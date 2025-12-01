@@ -555,7 +555,7 @@ const About = () => {
             <div className="absolute bottom-8 right-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
               <div className="flex items-center gap-2">
                 <i className="bx bx-award"></i>
-                <span>3+ Years Exp</span>
+                <span>2+ Years Exp</span>
               </div>
             </div>
 
@@ -573,8 +573,8 @@ const About = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-gray-800">
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
-            { number: "3+", label: "Years Experience", icon: "bx bx-calendar" },
-            { number: "5+", label: "Tech Stacks", icon: "bx bxl-react" },
+            { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
+            { number: "", label: "My Favorite Tools", icon: "bx bxl-react" },
             { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" }
           ].map((stat, index) => (
             <div
