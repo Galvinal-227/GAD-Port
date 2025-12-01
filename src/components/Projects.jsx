@@ -268,16 +268,10 @@ const Projects = () => {
             </div>
           ))}
         </div>
-
-        {/* View More Button */}
-        <div className="text-center mt-12">
-          <button className="border-2 border-gray-700 text-gray-300 hover:border-purple-500 hover:text-white py-3 px-8 rounded-xl font-semibold transition-all duration-300">
-            View All Projects
-          </button>
-        </div>
       </div>
     </section>
   );
 };
+
 
 export default Projects;
