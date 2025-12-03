@@ -109,7 +109,7 @@ const Projects = () => {
       description: "Dashboard cuaca dengan forecast 7 hari dan multiple location support.",
       tags: ["JavaScript", "API", "CSS3", "Chart.js"],
       category: "web",
-      link: "#",
+      link: "https://galvinal-227.github.io/WeatherDashboard/",
       demoUrl: "#",
       type: "web",
       status: "Completed",
@@ -493,3 +493,4 @@ const Projects = () => {
 };
 
 export default Projects;
+
