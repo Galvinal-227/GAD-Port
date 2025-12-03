@@ -110,7 +110,7 @@ const Projects = () => {
       tags: ["JavaScript", "API", "CSS3", "Chart.js"],
       category: "web",
       link: "https://galvinal-227.github.io/WeatherDashboard/",
-      demoUrl: "#",
+      demoUrl: "https://galvinal-227.github.io/WeatherDashboard/",
       type: "web",
       status: "Completed",
       github: "https://github.com",
@@ -493,4 +493,5 @@ const Projects = () => {
 };
 
 export default Projects;
+
 
