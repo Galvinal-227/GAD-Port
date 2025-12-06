@@ -15,6 +15,91 @@ const About = () => {
   const statsRef = useRef([]);
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeAnimation, setLikeAnimation] = useState(false);
+
+  // State untuk project URL
+  const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
+
+  // Check localStorage saat komponen mount
+  useEffect(() => {
+    const liked = localStorage.getItem('aboutSectionLiked') === 'true';
+    setIsLiked(liked);
+  }, []);
+
+  // Fungsi untuk handle like
+  const handleLike = () => {
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    localStorage.setItem('aboutSectionLiked', newLikedState.toString());
+    
+    // Trigger animation
+    setLikeAnimation(true);
+    setTimeout(() => setLikeAnimation(false), 1000);
+    
+    // Animation effect
+    if (newLikedState) {
+      gsap.to('.like-button', {
+        scale: 1.3,
+        duration: 0.2,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.out"
+      });
+      
+      // Confetti effect
+      createConfetti();
+    }
+  };
+
+  // Fungsi untuk membuat efek confetti
+  const createConfetti = () => {
+    const confettiContainer = document.querySelector('.confetti-container');
+    if (!confettiContainer) return;
+
+    // Hapus confetti sebelumnya
+    confettiContainer.innerHTML = '';
+
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+    
+    for (let i = 0; i < 20; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.cssText = `
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        top: 50%;
+        left: 50%;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+        opacity: 0;
+      `;
+
+      confettiContainer.appendChild(confetti);
+
+      gsap.to(confetti, {
+        x: (Math.random() - 0.5) * 200,
+        y: (Math.random() - 0.5) * 200,
+        rotation: Math.random() * 360,
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+
+      gsap.to(confetti, {
+        opacity: 0,
+        y: '+=20',
+        duration: 0.5,
+        delay: 0.5,
+        onComplete: () => {
+          if (confetti.parentNode === confettiContainer) {
+            confettiContainer.removeChild(confetti);
+          }
+        }
+      });
+    }
+  };
 
   const skills = [
     { name: "React.js / Next.js", icon: "bx bxl-react", color: "text-blue-400", level: 90 },
@@ -393,7 +478,10 @@ const About = () => {
   };
 
   return (
-    <section ref={sectionRef}  id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
+    <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
+      {/* Container untuk confetti */}
+      <div className="confetti-container absolute inset-0 pointer-events-none z-0"></div>
+      
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-element absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full blur-3xl opacity-10"></div>
@@ -402,15 +490,32 @@ const About = () => {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Section Header */}
-        <div className="text-center mb-16">
+        {/* Section Header dengan tombol like */}
+        <div className="text-center mb-16 relative">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
             About <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Me</span>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-cyan-500 mx-auto mb-6 rounded-full"></div>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mb-8">
             Crafting digital experiences with code, creativity, and cutting-edge technology
           </p>
+          
+          {/* Tombol Like */}
+          <button
+            onClick={handleLike}
+            className={`like-button inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all duration-300 ${isLiked 
+              ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/25' 
+              : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700'
+            }`}
+          >
+            <i className={`bx ${isLiked ? 'bxs-heart' : 'bx-heart'} text-xl ${likeAnimation ? 'animate-pulse' : ''}`}></i>
+            <span>{isLiked ? 'Liked!' : 'Like this section'}</span>
+            {isLiked && (
+              <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                ✓ Saved
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Content Grid */}
@@ -498,12 +603,27 @@ const About = () => {
                 <i className="bx bx-chat text-xl"></i>
               </a>
               
+              {/* Tombol View Projects dengan URL eksternal */}
               <a
-                href="#projects"
-                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-purple-500 hover:text-white hover:bg-purple-500/10 flex items-center gap-3"
+                href={projectsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-purple-500 hover:text-white hover:bg-purple-500/10 flex items-center gap-3 group"
               >
                 <span>View Projects</span>
-                <i className="bx bx-folder-open text-xl"></i>
+                <i className="bx bx-folder-open text-xl group-hover:animate-pulse"></i>
+                <i className="bx bx-link-external text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
+              </a>
+              
+              {/* Tombol Download CV (opsional) */}
+              <a
+                href="/resume.pdf" // Ganti dengan URL CV kamu
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-cyan-500 hover:text-white hover:bg-cyan-500/10 flex items-center gap-3"
+              >
+                <span>Download CV</span>
+                <i className="bx bx-download text-xl"></i>
               </a>
             </div>
           </div>
@@ -603,6 +723,29 @@ const About = () => {
         .skill-item,
         .tool-item {
           transition: transform 0.3s ease;
+        }
+
+        /* Animasi untuk confetti */
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+
+        /* Animasi untuk like button */
+        @keyframes heartBeat {
+          0% { transform: scale(1); }
+          25% { transform: scale(1.3); }
+          50% { transform: scale(1); }
+          75% { transform: scale(1.2); }
+          100% { transform: scale(1); }
+        }
+
+        .animate-heart-beat {
+          animation: heartBeat 0.8s ease-in-out;
         }
       `}</style>
     </section>
