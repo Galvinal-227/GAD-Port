@@ -13,18 +13,39 @@ const About = () => {
   const skillsRef = useRef([]);
   const toolsRef = useRef([]);
   const statsRef = useRef([]);
+  const notificationRef = useRef(null);
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLiked, setIsLiked] = useState(false);
   const [likeAnimation, setLikeAnimation] = useState(false);
+  const [totalLikes, setTotalLikes] = useState(0);
+  const [notification, setNotification] = useState({ show: false, message: '' });
+  const [showLikeTooltip, setShowLikeTooltip] = useState(false);
 
   // State untuk project URL
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
 
-  // Check localStorage saat komponen mount
+  // Initialize likes dari localStorage saat komponen mount
   useEffect(() => {
     const liked = localStorage.getItem('aboutSectionLiked') === 'true';
     setIsLiked(liked);
+    
+    // Get total likes
+    const storedLikes = localStorage.getItem('aboutSectionTotalLikes');
+    if (storedLikes) {
+      setTotalLikes(parseInt(storedLikes));
+    } else {
+      // Initialize with random likes for demo
+      const randomLikes = Math.floor(Math.random() * 50) + 20;
+      setTotalLikes(randomLikes);
+      localStorage.setItem('aboutSectionTotalLikes', randomLikes.toString());
+    }
+
+    // Show initial tooltip
+    setTimeout(() => {
+      setShowLikeTooltip(true);
+      setTimeout(() => setShowLikeTooltip(false), 4000);
+    }, 2000);
   }, []);
 
   // Fungsi untuk handle like
@@ -33,23 +54,83 @@ const About = () => {
     setIsLiked(newLikedState);
     localStorage.setItem('aboutSectionLiked', newLikedState.toString());
     
+    // Update total likes
+    let newTotalLikes = totalLikes;
+    if (newLikedState) {
+      newTotalLikes += 1;
+      // Show notification
+      setNotification({
+        show: true,
+        message: `👍 You liked this section! Total: ${newTotalLikes} likes`
+      });
+      
+      // Auto-hide notification after 5 seconds
+      setTimeout(() => {
+        setNotification({ show: false, message: '' });
+      }, 5000);
+    } else {
+      newTotalLikes = Math.max(0, newTotalLikes - 1);
+      setNotification({
+        show: true,
+        message: `👎 You unliked this section. Total: ${newTotalLikes} likes`
+      });
+      
+      setTimeout(() => {
+        setNotification({ show: false, message: '' });
+      }, 3000);
+    }
+    
+    setTotalLikes(newTotalLikes);
+    localStorage.setItem('aboutSectionTotalLikes', newTotalLikes.toString());
+    
     // Trigger animation
     setLikeAnimation(true);
     setTimeout(() => setLikeAnimation(false), 1000);
     
     // Animation effect
+    gsap.to('.like-button', {
+      scale: newLikedState ? 1.3 : 0.9,
+      duration: 0.2,
+      yoyo: true,
+      repeat: 1,
+      ease: "power2.out"
+    });
+    
     if (newLikedState) {
-      gsap.to('.like-button', {
-        scale: 1.3,
-        duration: 0.2,
-        yoyo: true,
-        repeat: 1,
-        ease: "power2.out"
-      });
-      
-      // Confetti effect
       createConfetti();
+      
+      // Show email notification option after liking
+      setTimeout(() => {
+        setNotification({
+          show: true,
+          message: "📧 Want to get notified when others like your work?"
+        });
+        
+        setTimeout(() => {
+          setNotification({ show: false, message: '' });
+        }, 6000);
+      }, 2000);
     }
+  };
+
+  // Fungsi untuk simulate sharing via email (simulasi)
+  const simulateEmailNotification = () => {
+    const subject = "Someone liked your About section!";
+    const body = `Hi,\n\nSomeone just liked your About section on your portfolio!\n\nTotal likes: ${totalLikes}\n\nKeep up the great work!\n\nBest,\nYour Portfolio Notifier`;
+    
+    // Create a temporary link to simulate email
+    const mailtoLink = `mailto:your-email@example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoLink, '_blank');
+    
+    // Show notification
+    setNotification({
+      show: true,
+      message: "📧 Email notification prepared! Fill in your email address to send."
+    });
+    
+    setTimeout(() => {
+      setNotification({ show: false, message: '' });
+    }, 5000);
   };
 
   // Fungsi untuk membuat efek confetti
@@ -477,6 +558,26 @@ const About = () => {
     });
   };
 
+  // Effect untuk animasi notifikasi
+  useEffect(() => {
+    if (notification.show && notificationRef.current) {
+      gsap.fromTo(notificationRef.current,
+        {
+          y: 50,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: "back.out(1.7)"
+        }
+      );
+    }
+  }, [notification]);
+
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
       {/* Container untuk confetti */}
@@ -489,6 +590,38 @@ const About = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-600 rounded-full blur-3xl opacity-5"></div>
       </div>
 
+      {/* Notification Toast */}
+      {notification.show && (
+        <div 
+          ref={notificationRef}
+          className="notification-toast fixed top-6 right-6 z-50 bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-2xl p-4 max-w-sm"
+          onClick={() => setNotification({ show: false, message: '' })}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              <i className="bx bx-bell text-cyan-400 text-xl"></i>
+            </div>
+            <div className="flex-1">
+              <p className="text-white text-sm font-medium">{notification.message}</p>
+            </div>
+            <button className="text-gray-400 hover:text-white">
+              <i className="bx bx-x text-xl"></i>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Like Tooltip */}
+      {showLikeTooltip && (
+        <div className="fixed bottom-24 right-6 z-40 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 px-4 rounded-lg shadow-2xl animate-bounce">
+          <div className="flex items-center gap-2">
+            <i className="bx bx-like text-xl"></i>
+            <span className="text-sm font-medium">Click the heart to like this section!</span>
+          </div>
+          <div className="absolute -bottom-2 right-10 w-4 h-4 bg-gradient-to-r from-purple-600 to-blue-600 transform rotate-45"></div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header dengan tombol like */}
         <div className="text-center mb-16 relative">
@@ -500,22 +633,52 @@ const About = () => {
             Crafting digital experiences with code, creativity, and cutting-edge technology
           </p>
           
-          {/* Tombol Like */}
-          <button
-            onClick={handleLike}
-            className={`like-button inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all duration-300 ${isLiked 
-              ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/25' 
-              : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700'
-            }`}
-          >
-            <i className={`bx ${isLiked ? 'bxs-heart' : 'bx-heart'} text-xl ${likeAnimation ? 'animate-pulse' : ''}`}></i>
-            <span>{isLiked ? 'Liked!' : 'Like this section'}</span>
-            {isLiked && (
-              <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                ✓ Saved
-              </span>
-            )}
-          </button>
+          {/* Like Counter & Button */}
+          <div className="inline-flex items-center gap-4 mb-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white mb-1">{totalLikes}</div>
+              <div className="text-sm text-gray-400">Total Likes</div>
+            </div>
+            
+            <button
+              onClick={handleLike}
+              className={`like-button relative inline-flex items-center gap-3 px-6 py-4 rounded-full font-semibold transition-all duration-300 ${isLiked 
+                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-2xl shadow-red-500/30' 
+                : 'bg-gradient-to-r from-gray-800 to-gray-900 text-gray-300 hover:text-white border border-gray-700'
+              }`}
+            >
+              <div className="relative">
+                <i className={`bx ${isLiked ? 'bxs-heart' : 'bx-heart'} text-2xl ${likeAnimation ? 'animate-heart-beat' : ''}`}></i>
+                {isLiked && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 bg-white/20 rounded-full animate-ping"></div>
+                  </div>
+                )}
+              </div>
+              <span className="font-bold">{isLiked ? 'Liked!' : 'Like'}</span>
+              
+              {/* Like count badge */}
+              <div className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-bold ${isLiked ? 'bg-white text-red-500' : 'bg-gray-700 text-gray-300'}`}>
+                {isLiked ? '+1' : '+0'}
+              </div>
+            </button>
+
+            {/* Email Notification Button */}
+            <button
+              onClick={simulateEmailNotification}
+              className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-3 px-4 rounded-full font-semibold hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 flex items-center gap-2"
+              title="Get email notifications"
+            >
+              <i className="bx bx-bell text-xl"></i>
+              <span className="hidden sm:inline">Notify</span>
+            </button>
+          </div>
+
+          {/* Like Status */}
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+            <i className={`bx ${isLiked ? 'bxs-check-circle text-green-400' : 'bx-circle'}`}></i>
+            <span>{isLiked ? 'You have liked this section' : 'Not liked yet'}</span>
+          </div>
         </div>
 
         {/* Content Grid */}
@@ -679,6 +842,14 @@ const About = () => {
               </div>
             </div>
 
+            {/* Like Counter Badge */}
+            <div className="absolute top-8 -left-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-3 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
+              <div className="flex items-center gap-2">
+                <i className="bx bx-like"></i>
+                <span>{totalLikes} likes</span>
+              </div>
+            </div>
+
             {/* Hover Instruction */}
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
               <p className="text-gray-400 text-sm flex items-center gap-2">
@@ -694,7 +865,7 @@ const About = () => {
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
             { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
-            { number: "", label: "My Favorite Tools", icon: "bx bxl-react" },
+            { number: totalLikes.toString(), label: "Total Likes", icon: "bx bx-heart" },
             { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" }
           ].map((stat, index) => (
             <div
@@ -746,6 +917,22 @@ const About = () => {
 
         .animate-heart-beat {
           animation: heartBeat 0.8s ease-in-out;
+        }
+
+        /* Animasi untuk notification */
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .notification-toast {
+          animation: slideIn 0.3s ease-out;
         }
       `}</style>
     </section>
