@@ -19,34 +19,107 @@ const About = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeAnimation, setLikeAnimation] = useState(false);
   const [totalLikes, setTotalLikes] = useState(0);
-  const [notification, setNotification] = useState({ show: false, message: '' });
+  const [notifications, setNotifications] = useState([]);
   const [showLikeTooltip, setShowLikeTooltip] = useState(false);
+  const [likeHistory, setLikeHistory] = useState([]);
+  const [realtimeLikes, setRealtimeLikes] = useState(0);
+
+  // Broadcast Channel untuk real-time communication antar tab
+  const [broadcastChannel, setBroadcastChannel] = useState(null);
 
   // State untuk project URL
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
 
-  // Initialize likes dari localStorage saat komponen mount
+  // Initialize dari localStorage dan setup broadcast channel
   useEffect(() => {
+    // Setup broadcast channel untuk real-time communication
+    const channel = new BroadcastChannel('about-section-likes');
+    setBroadcastChannel(channel);
+
+    // Listen untuk messages dari tab lain
+    channel.onmessage = (event) => {
+      if (event.data.type === 'LIKE_UPDATE') {
+        setTotalLikes(event.data.totalLikes);
+        setRealtimeLikes(prev => prev + 1);
+        
+        // Show notification jika bukan dari tab ini sendiri
+        if (event.data.source !== 'self') {
+          showRealTimeNotification('🎉 Someone just liked this section!');
+          
+          // Update like history
+          setLikeHistory(prev => [
+            {
+              time: new Date().toLocaleTimeString(),
+              count: event.data.totalLikes,
+              isNew: true
+            },
+            ...prev.slice(0, 4)
+          ]);
+        }
+      }
+    };
+
+    // Initialize data dari localStorage
     const liked = localStorage.getItem('aboutSectionLiked') === 'true';
     setIsLiked(liked);
     
     // Get total likes
     const storedLikes = localStorage.getItem('aboutSectionTotalLikes');
     if (storedLikes) {
-      setTotalLikes(parseInt(storedLikes));
+      const likes = parseInt(storedLikes);
+      setTotalLikes(likes);
+      setRealtimeLikes(likes);
     } else {
-      // Initialize with random likes for demo
       const randomLikes = Math.floor(Math.random() * 50) + 20;
       setTotalLikes(randomLikes);
+      setRealtimeLikes(randomLikes);
       localStorage.setItem('aboutSectionTotalLikes', randomLikes.toString());
     }
+
+    // Initialize like history
+    const history = JSON.parse(localStorage.getItem('aboutSectionLikeHistory') || '[]');
+    setLikeHistory(history);
 
     // Show initial tooltip
     setTimeout(() => {
       setShowLikeTooltip(true);
       setTimeout(() => setShowLikeTooltip(false), 4000);
     }, 2000);
+
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // Cleanup
+    return () => {
+      channel.close();
+    };
   }, []);
+
+  // Fungsi untuk show real-time notification
+  const showRealTimeNotification = (message) => {
+    // Browser Notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('About Section Update', {
+        body: message,
+        icon: '/favicon.ico',
+        tag: 'like-notification'
+      });
+    }
+
+    // In-app notification
+    const id = Date.now();
+    setNotifications(prev => [
+      { id, message, type: 'realtime' },
+      ...prev.slice(0, 3) // Keep max 3 notifications
+    ]);
+
+    // Auto remove notification after 5 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 5000);
+  };
 
   // Fungsi untuk handle like
   const handleLike = () => {
@@ -58,30 +131,36 @@ const About = () => {
     let newTotalLikes = totalLikes;
     if (newLikedState) {
       newTotalLikes += 1;
-      // Show notification
-      setNotification({
-        show: true,
-        message: `👍 You liked this section! Total: ${newTotalLikes} likes`
-      });
       
-      // Auto-hide notification after 5 seconds
-      setTimeout(() => {
-        setNotification({ show: false, message: '' });
-      }, 5000);
+      // Update like history
+      const newHistory = [{
+        time: new Date().toLocaleTimeString(),
+        count: newTotalLikes,
+        isNew: true
+      }, ...likeHistory.slice(0, 4)];
+      
+      setLikeHistory(newHistory);
+      localStorage.setItem('aboutSectionLikeHistory', JSON.stringify(newHistory));
+      
+      // Show notification
+      showRealTimeNotification(`👍 You liked this section! Total: ${newTotalLikes} likes`);
     } else {
       newTotalLikes = Math.max(0, newTotalLikes - 1);
-      setNotification({
-        show: true,
-        message: `👎 You unliked this section. Total: ${newTotalLikes} likes`
-      });
-      
-      setTimeout(() => {
-        setNotification({ show: false, message: '' });
-      }, 3000);
+      showRealTimeNotification(`👎 You unliked this section. Total: ${newTotalLikes} likes`);
     }
     
     setTotalLikes(newTotalLikes);
+    setRealtimeLikes(newTotalLikes);
     localStorage.setItem('aboutSectionTotalLikes', newTotalLikes.toString());
+    
+    // Broadcast to other tabs
+    if (broadcastChannel) {
+      broadcastChannel.postMessage({
+        type: 'LIKE_UPDATE',
+        totalLikes: newTotalLikes,
+        source: 'self'
+      });
+    }
     
     // Trigger animation
     setLikeAnimation(true);
@@ -99,38 +178,38 @@ const About = () => {
     if (newLikedState) {
       createConfetti();
       
-      // Show email notification option after liking
+      // Simulate other people liking (for demo purposes)
       setTimeout(() => {
-        setNotification({
-          show: true,
-          message: "📧 Want to get notified when others like your work?"
-        });
-        
-        setTimeout(() => {
-          setNotification({ show: false, message: '' });
-        }, 6000);
+        simulateOtherLikes();
       }, 2000);
     }
   };
 
-  // Fungsi untuk simulate sharing via email (simulasi)
-  const simulateEmailNotification = () => {
-    const subject = "Someone liked your About section!";
-    const body = `Hi,\n\nSomeone just liked your About section on your portfolio!\n\nTotal likes: ${totalLikes}\n\nKeep up the great work!\n\nBest,\nYour Portfolio Notifier`;
-    
-    // Create a temporary link to simulate email
-    const mailtoLink = `mailto:your-email@example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink, '_blank');
-    
-    // Show notification
-    setNotification({
-      show: true,
-      message: "📧 Email notification prepared! Fill in your email address to send."
-    });
-    
-    setTimeout(() => {
-      setNotification({ show: false, message: '' });
-    }, 5000);
+  // Simulate other people liking (demo only)
+  const simulateOtherLikes = () => {
+    if (Math.random() > 0.7) { // 30% chance
+      const simulatedLikes = Math.floor(Math.random() * 3) + 1;
+      const newTotal = totalLikes + simulatedLikes;
+      
+      setTotalLikes(newTotal);
+      setRealtimeLikes(prev => prev + simulatedLikes);
+      localStorage.setItem('aboutSectionTotalLikes', newTotal.toString());
+      
+      // Broadcast simulation
+      if (broadcastChannel) {
+        broadcastChannel.postMessage({
+          type: 'LIKE_UPDATE',
+          totalLikes: newTotal,
+          source: 'simulated'
+        });
+      }
+      
+      showRealTimeNotification(
+        simulatedLikes === 1 
+          ? '🌟 Someone else liked this section!' 
+          : `🎊 ${simulatedLikes} people liked this section!`
+      );
+    }
   };
 
   // Fungsi untuk membuat efek confetti
@@ -558,25 +637,25 @@ const About = () => {
     });
   };
 
-  // Effect untuk animasi notifikasi
-  useEffect(() => {
-    if (notification.show && notificationRef.current) {
-      gsap.fromTo(notificationRef.current,
-        {
-          y: 50,
-          opacity: 0,
-          scale: 0.8
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          ease: "back.out(1.7)"
-        }
-      );
+  // Remove notification
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  // Fungsi untuk enable browser notifications
+  const enableBrowserNotifications = () => {
+    if ('Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            showRealTimeNotification('🔔 Browser notifications enabled!');
+          }
+        });
+      } else if (Notification.permission === 'granted') {
+        showRealTimeNotification('🔔 Browser notifications are already enabled!');
+      }
     }
-  }, [notification]);
+  };
 
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
@@ -590,26 +669,32 @@ const About = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-600 rounded-full blur-3xl opacity-5"></div>
       </div>
 
-      {/* Notification Toast */}
-      {notification.show && (
-        <div 
-          ref={notificationRef}
-          className="notification-toast fixed top-6 right-6 z-50 bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-2xl p-4 max-w-sm"
-          onClick={() => setNotification({ show: false, message: '' })}
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <i className="bx bx-bell text-cyan-400 text-xl"></i>
+      {/* Notifications Stack */}
+      <div className="fixed top-6 right-6 z-50 space-y-3">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className="notification-toast bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-2xl p-4 max-w-sm transform transition-all duration-300 animate-slideIn"
+            onClick={() => removeNotification(notification.id)}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                {notification.type === 'realtime' ? (
+                  <i className="bx bx-bell-ring text-cyan-400 text-xl"></i>
+                ) : (
+                  <i className="bx bx-bell text-cyan-400 text-xl"></i>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-white text-sm font-medium">{notification.message}</p>
+              </div>
+              <button className="text-gray-400 hover:text-white">
+                <i className="bx bx-x text-xl"></i>
+              </button>
             </div>
-            <div className="flex-1">
-              <p className="text-white text-sm font-medium">{notification.message}</p>
-            </div>
-            <button className="text-gray-400 hover:text-white">
-              <i className="bx bx-x text-xl"></i>
-            </button>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
 
       {/* Like Tooltip */}
       {showLikeTooltip && (
@@ -635,16 +720,45 @@ const About = () => {
           
           {/* Like Counter & Button */}
           <div className="inline-flex items-center gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-1">{totalLikes}</div>
-              <div className="text-sm text-gray-400">Total Likes</div>
+            {/* Like Counter */}
+            <div className="relative group">
+              <div className="text-center bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl py-3 px-6">
+                <div className="text-3xl font-bold text-white mb-1 flex items-center justify-center gap-2">
+                  <i className="bx bx-heart text-red-400"></i>
+                  {totalLikes}
+                </div>
+                <div className="text-sm text-gray-400">Total Likes</div>
+              </div>
+              
+              {/* Like History Tooltip */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-2xl min-w-48">
+                  <div className="text-xs text-gray-400 mb-2">Recent Likes</div>
+                  {likeHistory.length > 0 ? (
+                    likeHistory.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2">
+                          <i className="bx bx-time text-gray-500 text-xs"></i>
+                          <span className="text-gray-300 text-xs">{item.time}</span>
+                        </div>
+                        <span className={`text-xs font-medium ${item.isNew ? 'text-green-400' : 'text-gray-400'}`}>
+                          {item.count} likes
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-400 text-xs py-2">No likes yet</div>
+                  )}
+                </div>
+              </div>
             </div>
             
+            {/* Like Button */}
             <button
               onClick={handleLike}
               className={`like-button relative inline-flex items-center gap-3 px-6 py-4 rounded-full font-semibold transition-all duration-300 ${isLiked 
                 ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-2xl shadow-red-500/30' 
-                : 'bg-gradient-to-r from-gray-800 to-gray-900 text-gray-300 hover:text-white border border-gray-700'
+                : 'bg-gradient-to-r from-gray-800 to-gray-900 text-gray-300 hover:text-white border border-gray-700 hover:border-red-500'
               }`}
             >
               <div className="relative">
@@ -657,27 +771,48 @@ const About = () => {
               </div>
               <span className="font-bold">{isLiked ? 'Liked!' : 'Like'}</span>
               
-              {/* Like count badge */}
-              <div className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-bold ${isLiked ? 'bg-white text-red-500' : 'bg-gray-700 text-gray-300'}`}>
-                {isLiked ? '+1' : '+0'}
-              </div>
+              {/* Real-time Like Indicator */}
+              {realtimeLikes > 0 && (
+                <div className="absolute -top-2 -right-2 animate-pulse">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-green-500 rounded-full animate-ping"></div>
+                    <div className="relative px-2 py-1 bg-green-600 rounded-full text-xs font-bold text-white">
+                      +{realtimeLikes}
+                    </div>
+                  </div>
+                </div>
+              )}
             </button>
 
-            {/* Email Notification Button */}
+            {/* Notification Settings Button */}
             <button
-              onClick={simulateEmailNotification}
-              className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-3 px-4 rounded-full font-semibold hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 flex items-center gap-2"
-              title="Get email notifications"
+              onClick={enableBrowserNotifications}
+              className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-3 px-4 rounded-full font-semibold hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 flex items-center gap-2 group"
+              title="Enable real-time notifications"
             >
               <i className="bx bx-bell text-xl"></i>
               <span className="hidden sm:inline">Notify</span>
+              <div className="absolute -top-2 -right-2 w-2 h-2 bg-green-500 rounded-full animate-ping group-hover:animate-none"></div>
             </button>
           </div>
 
-          {/* Like Status */}
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-            <i className={`bx ${isLiked ? 'bxs-check-circle text-green-400' : 'bx-circle'}`}></i>
-            <span>{isLiked ? 'You have liked this section' : 'Not liked yet'}</span>
+          {/* Like Status & Real-time Indicator */}
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${isLiked ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}></div>
+              <span className="text-gray-400">
+                {isLiked ? 'You liked this section' : 'Click heart to like'}
+              </span>
+            </div>
+            
+            {realtimeLikes > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-xs font-medium">
+                  +{realtimeLikes} real-time update{realtimeLikes > 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -842,11 +977,16 @@ const About = () => {
               </div>
             </div>
 
-            {/* Like Counter Badge */}
+            {/* Real-time Like Indicator */}
             <div className="absolute top-8 -left-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-3 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
               <div className="flex items-center gap-2">
                 <i className="bx bx-like"></i>
                 <span>{totalLikes} likes</span>
+                {realtimeLikes > 0 && (
+                  <span className="text-xs bg-white/20 px-1 rounded animate-pulse">
+                    +{realtimeLikes}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -865,7 +1005,12 @@ const About = () => {
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
             { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
-            { number: totalLikes.toString(), label: "Total Likes", icon: "bx bx-heart" },
+            { 
+              number: totalLikes.toString(), 
+              label: "Total Likes", 
+              icon: "bx bx-heart",
+              subtext: `${realtimeLikes > 0 ? `+${realtimeLikes} today` : 'Like now!'}`
+            },
             { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" }
           ].map((stat, index) => (
             <div
@@ -878,8 +1023,21 @@ const About = () => {
               </div>
               <h4 className="text-2xl font-bold text-white mb-2">{stat.number}</h4>
               <p className="text-gray-400 text-sm">{stat.label}</p>
+              {stat.subtext && (
+                <p className="text-green-400 text-xs mt-1 animate-pulse">{stat.subtext}</p>
+              )}
             </div>
           ))}
+        </div>
+
+        {/* Real-time Demo Notice */}
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 bg-gray-800/50 border border-gray-700 rounded-full px-4 py-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-gray-400 text-sm">
+              Likes sync across browser tabs in real-time
+            </span>
+          </div>
         </div>
       </div>
 
@@ -931,7 +1089,26 @@ const About = () => {
           }
         }
 
+        @keyframes slideOut {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+
         .notification-toast {
+          animation: slideIn 0.3s ease-out;
+        }
+
+        .notification-toast.hiding {
+          animation: slideOut 0.3s ease-in;
+        }
+
+        .animate-slideIn {
           animation: slideIn 0.3s ease-out;
         }
       `}</style>
