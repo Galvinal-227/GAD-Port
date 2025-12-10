@@ -32,7 +32,7 @@ const Hero = () => {
       <div className="ml-[5%] mt-24">
         
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-wider my-8">
-          GAD
+          GALVIN ALFITO D.
         </h1>
 
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-wider mb-4">
@@ -85,5 +85,6 @@ const Hero = () => {
     </main>
   )
 }
+
 
 export default Hero
