@@ -44,11 +44,20 @@ const Hero = () => {
         </p>
 
         <div className="flex gap-4 mt-8">
-          <Link
-            to="/Resume"
-            className="border border-[#2a2a2a] py-2 sm:py-3 px-4 sm:px-10 rounded-full sm:text-lg text-sm font-semibold tracking-wider transition-all duration-300 hover:bg-[#1a1a1a]">
-            My Resume <i className="bx bx-link-external"></i>
-          </Link>
+          <a
+  href="https://drive.google.com/file/d/your-resume-id/view"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="group border border-[#2a2a2a] py-2 sm:py-3 px-4 sm:px-10 rounded-full sm:text-lg text-sm font-semibold tracking-wider transition-all duration-300 hover:bg-[#1a1a1a] hover:border-[#3a3a3a] relative overflow-hidden"
+>
+  <span className="relative z-10 flex items-center justify-center gap-2">
+    My Resume 
+    <i className="bx bx-link-external text-sm group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300"></i>
+  </span>
+  
+  {/* Hover effect background */}
+  <span className="absolute inset-0 bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></span>
+</a>
         </div>
 
       </div>
@@ -88,3 +97,4 @@ const Hero = () => {
 
 
 export default Hero
+
