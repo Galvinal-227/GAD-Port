@@ -139,7 +139,7 @@ const Header = () => {
         style={{ opacity: 0 }}
         onClick={() => handleNavClick({ preventDefault: () => {} }, 'home')}
       >
-        GAD
+        ALDEV
       </h1>
 
       {/* Desktop Navigation */}
@@ -219,3 +219,4 @@ const Header = () => {
 
 
 export default Header;
+
