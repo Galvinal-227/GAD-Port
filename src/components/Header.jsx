@@ -197,7 +197,6 @@ const Header = () => {
           {[
             { name: 'Home', id: 'home' },
             { name: 'About Me', id: 'about' },
-            { name: 'Projects', id: 'projects' },
             { name: 'Contact', id: 'contact' }
           ].map((item, index) => (
             <a
@@ -219,4 +218,5 @@ const Header = () => {
 
 
 export default Header;
+
 
