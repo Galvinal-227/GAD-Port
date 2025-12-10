@@ -48,15 +48,39 @@ const Hero = () => {
   href="https://drive.google.com/file/d/your-resume-id/view"
   target="_blank"
   rel="noopener noreferrer"
-  className="group border border-[#2a2a2a] py-2 sm:py-3 px-4 sm:px-10 rounded-full sm:text-lg text-sm font-semibold tracking-wider transition-all duration-300 hover:bg-[#1a1a1a] hover:border-[#3a3a3a] relative overflow-hidden"
+  className="group relative border border-[#2a2a2a] py-2 sm:py-3 px-4 sm:px-10 rounded-full sm:text-lg text-sm font-semibold tracking-wider overflow-hidden"
 >
-  <span className="relative z-10 flex items-center justify-center gap-2">
-    My Resume 
-    <i className="bx bx-link-external text-sm group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300"></i>
-  </span>
+  {/* Background layers */}
+  <div className="absolute inset-0 bg-[#0a0a0a] transition-all duration-500 group-hover:scale-105"></div>
   
-  {/* Hover effect background */}
-  <span className="absolute inset-0 bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></span>
+  {/* Animated gradient border */}
+  <div className="absolute inset-0 rounded-full p-[1px]">
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer"></div>
+  </div>
+  
+  {/* Content */}
+  <div className="relative flex items-center justify-center gap-2 z-10">
+    <span className="transition-all duration-300 group-hover:text-white">
+      My Resume
+    </span>
+    <i className="bx bx-link-external text-sm transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-blue-400"></i>
+  </div>
+  
+  {/* Hover effect */}
+  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+  
+  {/* Ripple effect */}
+  <span className="absolute inset-0 rounded-full bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-out"></span>
+  
+  <style jsx>{`
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .animate-shimmer {
+      animation: shimmer 2s infinite linear;
+    }
+  `}</style>
 </a>
         </div>
 
@@ -97,4 +121,5 @@ const Hero = () => {
 
 
 export default Hero
+
 
