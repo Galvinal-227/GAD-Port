@@ -122,12 +122,12 @@ const About = () => {
   };
 
   const skills = [
-    { name: "React.js / Next.js", icon: "bx bxl-react"},
-    { name: "JavaScript / TypeScript", icon: "bx bxl-javascript"},
-    { name: "GSAP Animations", icon: "bx bx-slider-alt"},
-    { name: "Tailwind CSS", icon: "bx bxl-tailwind-css"},
-    { name: "Three.js / 3D", icon: "bx bx-cube"},
-    { name: "Node.js / Express", icon: "bx bxl-nodejs"},
+    { name: "React.js / Next.js", icon: "bx bxl-react" },
+    { name: "JavaScript / TypeScript", icon: "bx bxl-javascript" },
+    { name: "GSAP Animations", icon: "bx bx-slider-alt" },
+    { name: "Tailwind CSS", icon: "bx bxl-tailwind-css" },
+    { name: "Three.js / 3D", icon: "bx bx-cube" },
+    { name: "Node.js / Express", icon: "bx bxl-nodejs" },
   ];
 
   const tools = [
@@ -258,25 +258,6 @@ const About = () => {
             duration: 0.8,
             delay: index * 0.15,
             ease: "back.out(1.7)",
-            scrollTrigger: {
-              trigger: skill,
-              start: "top 90%",
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
-
-        // Progress bar animation
-        const progressBar = skill.querySelector('.progress-bar');
-        const skillLevel = skills[index].level;
-        
-        gsap.fromTo(progressBar,
-          { width: 0 },
-          {
-            width: `${skillLevel}%`,
-            duration: 1.5,
-            delay: 0.5 + (index * 0.1),
-            ease: "power2.out",
             scrollTrigger: {
               trigger: skill,
               start: "top 90%",
@@ -572,22 +553,11 @@ const About = () => {
                     <div
                       key={skill.name}
                       ref={addToSkillsRefs}
-                      className="skill-item group cursor-pointer transform-style-3d"
+                      className="skill-item group cursor-pointer transform-style-3d p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 hover:border-purple-500 transition-all duration-300"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <i className={`${skill.icon} ${skill.color} text-xl`}></i>
-                          <span className="text-gray-300 font-medium">{skill.name}</span>
-                        </div>
-                        <span className="text-gray-400 text-sm">{skill.level}%</span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-2">
-                        <div 
-                          className="progress-bar h-2 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 relative overflow-hidden"
-                          style={{ width: '0%' }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white opacity-20 animate-pulse"></div>
-                        </div>
+                      <div className="flex items-center gap-3">
+                        <i className={`${skill.icon} text-purple-400 text-xl`}></i>
+                        <span className="text-gray-300 font-medium text-lg">{skill.name}</span>
                       </div>
                     </div>
                   ))}
@@ -605,7 +575,7 @@ const About = () => {
                     <div
                       key={tool.name}
                       ref={addToToolsRefs}
-                      className="tool-item flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 cursor-pointer transform-style-3d"
+                      className="tool-item flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 cursor-pointer transform-style-3d hover:border-cyan-500 transition-all duration-300"
                     >
                       <i className={`${tool.icon} ${tool.color} text-xl`}></i>
                       <span className="text-gray-300 text-sm font-medium">{tool.name}</span>
