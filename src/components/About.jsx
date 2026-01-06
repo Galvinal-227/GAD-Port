@@ -122,12 +122,12 @@ const About = () => {
   };
 
   const skills = [
-    { name: "React.js / Next.js", icon: "bx bxl-react", color: "text-blue-400", level: 90 },
-    { name: "JavaScript / TypeScript", icon: "bx bxl-javascript", color: "text-yellow-400", level: 85 },
-    { name: "GSAP Animations", icon: "bx bx-slider-alt", color: "text-purple-400", level: 80 },
-    { name: "Tailwind CSS", icon: "bx bxl-tailwind-css", color: "text-cyan-400", level: 95 },
-    { name: "Three.js / 3D", icon: "bx bx-cube", color: "text-green-400", level: 75 },
-    { name: "Node.js / Express", icon: "bx bxl-nodejs", color: "text-green-500", level: 70 },
+    { name: "React.js / Next.js", icon: "bx bxl-react"},
+    { name: "JavaScript / TypeScript", icon: "bx bxl-javascript"},
+    { name: "GSAP Animations", icon: "bx bx-slider-alt"},
+    { name: "Tailwind CSS", icon: "bx bxl-tailwind-css"},
+    { name: "Three.js / 3D", icon: "bx bx-cube"},
+    { name: "Node.js / Express", icon: "bx bxl-nodejs"},
   ];
 
   const tools = [
