@@ -43,33 +43,6 @@ const Hero = () => {
           Passionate web developer with expertise in modern web technologies. I create responsive, user-friendly websites and applications that deliver exceptional user experiences.
         </p>
 
-        <div className="flex gap-4 mt-8">
-          <a
-  href="https://drive.google.com/file/d/your-resume-id/view"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="group relative border border-[#2a2a2a] py-2 sm:py-3 px-4 sm:px-10 rounded-full sm:text-lg text-sm font-semibold tracking-wider overflow-hidden"
->
-  {/* Background layers */}
-  <div className="absolute inset-0 bg-[#0a0a0a] transition-all duration-500 group-hover:scale-105"></div>
-  
-  {/* Animated gradient border */}
-  <div className="absolute inset-0 rounded-full p-[1px]">
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer"></div>
-  </div>
-
-  <style jsx>{`
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-    .animate-shimmer {
-      animation: shimmer 2s infinite linear;
-    }
-  `}</style>
-</a>
-        </div>
-
       </div>
 
       <Spline  
@@ -107,6 +80,7 @@ const Hero = () => {
 
 
 export default Hero
+
 
 
 
