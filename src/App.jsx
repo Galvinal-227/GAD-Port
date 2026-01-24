@@ -6,8 +6,7 @@ import 'boxicons/css/boxicons.min.css';
 import Hero from './components/Hero';
 import About from './components/About';
 import Contact from './components/Contact';
-import Loading from './components/Loading'; 
-import Resume from "./components/Resume";
+import Loading from './components/Loading';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -52,8 +51,6 @@ function App() {
                 </>
               } 
             />
-
-            <Route path="/Resume" element={<Resume />} />
           </Routes>
 
         </div>
