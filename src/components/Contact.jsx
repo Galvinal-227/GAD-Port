@@ -35,19 +35,19 @@ const Contact = () => {
       name: "LinkedIn", 
       icon: "bx bxl-linkedin", 
       url: "https://linkedin.com/in/galvinalfito",
-      color: "hover:bg-blue-600 hover:border-blue-500"
+      color: "hover:bg-yellow-700 hover:border-yellow-600"
     },
     { 
       name: "Instagram", 
       icon: "bx bxl-instagram", 
       url: "https://instagram.com/galvinalfito",
-      color: "hover:bg-pink-600 hover:border-pink-500"
+      color: "hover:bg-orange-600 hover:border-orange-500"
     },
     { 
       name: "Twitter", 
       icon: "bx bxl-twitter", 
       url: "https://twitter.com/galvinalfito",
-      color: "hover:bg-blue-400 hover:border-blue-300"
+      color: "hover:bg-amber-500 hover:border-amber-400"
     }
   ];
 
@@ -57,21 +57,21 @@ const Contact = () => {
       label: "Email",
       value: "galvinalfito@gmail.com",
       link: "mailto:galvinalfito@gmail.com",
-      color: "text-red-400"
+      color: "text-orange-400"
     },
     {
       icon: "bx bx-phone",
       label: "Phone",
       value: "+62 856-4752-7381",
       link: "https://wa.me/6285647527381",
-      color: "text-green-400"
+      color: "text-yellow-400"
     },
     {
       icon: "bx bx-map",
       label: "Location",
       value: "Nganjuk, Jawa Timur",
       link: "https://maps.google.com/?q=Nganjuk,Jawa+Timur",
-      color: "text-purple-400"
+      color: "text-amber-400"
     }
   ];
 
@@ -522,15 +522,15 @@ const Contact = () => {
 
   return (
     <section ref={sectionRef} id="contact" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] relative overflow-hidden min-h-screen">
-      {/* Background Elements */}
+      {/* Background Elements - Warna oranye */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="bg-element absolute -top-40 -left-40 w-80 h-80 bg-purple-600 rounded-full blur-3xl opacity-10"></div>
-        <div className="bg-element absolute -bottom-40 -right-40 w-80 h-80 bg-cyan-600 rounded-full blur-3xl opacity-10"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-5"></div>
+        <div className="bg-element absolute -top-40 -left-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20"></div>
+        <div className="bg-element absolute -bottom-40 -right-40 w-80 h-80 bg-amber-800 rounded-full blur-3xl opacity-20"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-900 rounded-full blur-3xl opacity-10"></div>
         
-        {/* Particles */}
+        {/* Particles - Warna oranye */}
         {[...Array(12)].map((_, i) => (
-          <div key={i} className="particle absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-cyan-400 rounded-full opacity-20" 
+          <div key={i} className="particle absolute w-2 h-2 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full opacity-20" 
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
@@ -543,9 +543,9 @@ const Contact = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            Get In <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Touch</span>
+            Get In <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">Touch</span>
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-cyan-500 mx-auto mb-6 rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-yellow-500 mx-auto mb-6 rounded-full"></div>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Let's create something amazing together. I'm always open to discussing new opportunities and creative ideas.
           </p>
@@ -573,7 +573,7 @@ const Contact = () => {
                   href={info.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="contact-item flex items-center gap-6 p-4 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 hover:border-purple-500/50 transition-all duration-300 group cursor-pointer transform-style-3d"
+                  className="contact-item flex items-center gap-6 p-4 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50 transition-all duration-300 group cursor-pointer transform-style-3d"
                 >
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${info.color}`}>
                     <i className={`${info.icon} text-xl`}></i>
@@ -582,7 +582,7 @@ const Contact = () => {
                     <p className="text-gray-400 text-sm font-medium">{info.label}</p>
                     <p className="text-white font-semibold">{info.value}</p>
                   </div>
-                  <i className="bx bx-chevron-right text-gray-400 text-xl group-hover:text-purple-400 transition-colors"></i>
+                  <i className="bx bx-chevron-right text-gray-400 text-xl group-hover:text-orange-400 transition-colors"></i>
                 </a>
               ))}
             </div>
@@ -635,8 +635,8 @@ const Contact = () => {
               ref={formRef}
               className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl border border-gray-700 p-8 shadow-2xl transform-style-3d relative overflow-hidden"
             >
-              {/* Form Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              {/* Form Glow Effect - Warna oranye */}
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               
               <h3 className="text-2xl font-bold mb-6 text-white relative z-10">Send Message 💌</h3>
               
@@ -650,7 +650,7 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="input-field w-full bg-gray-700 border-2 border-gray-600 rounded-xl px-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:bg-gray-600 transition-all duration-300 transform-style-3d"
+                    className="input-field w-full bg-gray-700 border-2 border-gray-600 rounded-xl px-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:bg-gray-600 transition-all duration-300 transform-style-3d"
                     placeholder="Enter your name"
                   />
                   <i className="bx bx-user absolute right-4 top-11 text-gray-400"></i>
@@ -665,7 +665,7 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="input-field w-full bg-gray-700 border-2 border-gray-600 rounded-xl px-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 focus:bg-gray-600 transition-all duration-300 transform-style-3d"
+                    className="input-field w-full bg-gray-700 border-2 border-gray-600 rounded-xl px-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:bg-gray-600 transition-all duration-300 transform-style-3d"
                     placeholder="your.email@example.com"
                   />
                   <i className="bx bx-envelope absolute right-4 top-11 text-gray-400"></i>
@@ -680,7 +680,7 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="input-field w-full bg-gray-700 border-2 border-gray-600 rounded-xl px-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:bg-gray-600 transition-all duration-300 resize-none transform-style-3d"
+                    className="input-field w-full bg-gray-700 border-2 border-gray-600 rounded-xl px-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:bg-gray-600 transition-all duration-300 resize-none transform-style-3d"
                     placeholder="Tell me about your project or just say hello..."
                   ></textarea>
                   <i className="bx bx-message-dots absolute right-4 top-11 text-gray-400"></i>
@@ -689,7 +689,7 @@ const Contact = () => {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="submit-btn w-full bg-gradient-to-r from-purple-600 to-cyan-600 text-white py-4 px-8 rounded-xl font-bold text-lg tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform-style-3d relative overflow-hidden group"
+                  className="submit-btn w-full bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-4 px-8 rounded-xl font-bold text-lg tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform-style-3d relative overflow-hidden group"
                 >
                   {/* Button Shine Effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
@@ -716,23 +716,23 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Floating Elements */}
-            <div className="floating-element absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            {/* Floating Elements - Warna oranye */}
+            <div className="floating-element absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-message-alt text-white text-lg"></i>
             </div>
 
-            <div className="floating-element absolute -bottom-6 -left-6 w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            <div className="floating-element absolute -bottom-6 -left-6 w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-rocket text-white text-sm"></i>
             </div>
 
-            <div className="floating-element absolute top-1/2 -right-8 w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl">
+            <div className="floating-element absolute top-1/2 -right-8 w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-star text-white text-xs"></i>
             </div>
 
             {/* Hover Instruction */}
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
               <p className="text-gray-400 text-sm flex items-center gap-2">
-                <i className="bx bx-mouse text-cyan-400"></i>
+                <i className="bx bx-mouse text-yellow-400"></i>
                 Move cursor for 3D effect
               </p>
             </div>
