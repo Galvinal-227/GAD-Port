@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // <-- Tambahkan ini
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -7,7 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const navigate = useNavigate(); // <-- Tambahkan ini
   const sectionRef = useRef(null);
   const imageRef = useRef(null);
   const imageContainerRef = useRef(null);
@@ -23,6 +21,9 @@ const About = () => {
 
   // State untuk project URL
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
+  
+  // Link Google Drive untuk CV (GANTI DENGAN LINK DRIVE KAMU)
+  const cvDriveUrl = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE";
 
   // Initialize dari localStorage
   useEffect(() => {
@@ -480,18 +481,6 @@ const About = () => {
     });
   };
 
-  // Fungsi untuk handle download CV
-  const handleDownloadCV = () => {
-    // Navigasi ke halaman Resume
-    navigate('/resume');
-    
-    // Tunggu sebentar untuk halaman load, lalu trigger download
-    setTimeout(() => {
-      // Simpan state untuk trigger download di Resume component
-      localStorage.setItem('autoDownloadCV', 'true');
-    }, 500);
-  };
-
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
       {/* Container untuk confetti */}
@@ -621,14 +610,25 @@ const About = () => {
                 <i className="bx bx-link-external text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
               </a>
               
-              {/* Tombol Download CV */}
-              <button
-                onClick={handleDownloadCV}
-                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group cursor-pointer"
+              {/* Tombol Download CV - Langsung ke Google Drive */}
+              <a
+                href={cvDriveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group"
+                onClick={(e) => {
+                  // Tambahkan animasi loading
+                  e.currentTarget.innerHTML = '<span>Downloading...</span><i class="bx bx-loader-alt animate-spin text-xl"></i>';
+                  
+                  // Reset button setelah 3 detik
+                  setTimeout(() => {
+                    e.currentTarget.innerHTML = '<span>Download CV</span><i class="bx bx-download text-xl group-hover:animate-bounce"></i>';
+                  }, 3000);
+                }}
               >
                 <span>Download CV</span>
                 <i className="bx bx-download text-xl group-hover:animate-bounce"></i>
-              </button>
+              </a>
             </div>
           </div>
 
