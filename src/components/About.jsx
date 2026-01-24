@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- Tambahkan ini
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -6,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
+  const navigate = useNavigate(); // <-- Tambahkan ini
   const sectionRef = useRef(null);
   const imageRef = useRef(null);
   const imageContainerRef = useRef(null);
@@ -478,6 +480,18 @@ const About = () => {
     });
   };
 
+  // Fungsi untuk handle download CV
+  const handleDownloadCV = () => {
+    // Navigasi ke halaman Resume
+    navigate('/resume');
+    
+    // Tunggu sebentar untuk halaman load, lalu trigger download
+    setTimeout(() => {
+      // Simpan state untuk trigger download di Resume component
+      localStorage.setItem('autoDownloadCV', 'true');
+    }, 500);
+  };
+
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
       {/* Container untuk confetti */}
@@ -609,11 +623,7 @@ const About = () => {
               
               {/* Tombol Download CV */}
               <button
-                onClick={() => {
-                  navigate('/Resume');
-                  setTimeout(() => {
-                  }, 1500);
-                }}
+                onClick={handleDownloadCV}
                 className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group cursor-pointer"
               >
                 <span>Download CV</span>
