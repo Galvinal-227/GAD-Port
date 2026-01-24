@@ -80,7 +80,7 @@ const About = () => {
 
     confettiContainer.innerHTML = '';
 
-    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+    const colors = ['#ff6b6b', '#ffa500', '#ff8c00', '#ffcc00', '#ff9800', '#ff5722'];
     
     for (let i = 0; i < 20; i++) {
       const confetti = document.createElement('div');
@@ -132,9 +132,9 @@ const About = () => {
 
   const tools = [
     { name: "Git / GitHub", icon: "bx bxl-git", color: "text-orange-400" },
-    { name: "VS Code", icon: "bx bx-code-alt", color: "text-green-400" },
-    { name: "Figma", icon: "bx bxl-figma", color: "text-purple-400" },
-    { name: "Netlify / Vercel", icon: "bx bx-cloud-upload", color: "text-blue-300" },
+    { name: "VS Code", icon: "bx bx-code-alt", color: "text-orange-300" },
+    { name: "Figma", icon: "bx bxl-figma", color: "text-orange-200" },
+    { name: "Netlify / Vercel", icon: "bx bx-cloud-upload", color: "text-yellow-400" },
   ];
 
   // Mouse move handler untuk 3D effect
@@ -483,20 +483,20 @@ const About = () => {
       {/* Container untuk confetti */}
       <div className="confetti-container absolute inset-0 pointer-events-none z-0"></div>
       
-      {/* Background Elements */}
+      {/* Background Elements - Warna oranye */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="bg-element absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full blur-3xl opacity-10"></div>
-        <div className="bg-element absolute -bottom-40 -left-40 w-80 h-80 bg-blue-600 rounded-full blur-3xl opacity-10"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-600 rounded-full blur-3xl opacity-5"></div>
+        <div className="bg-element absolute -top-40 -right-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20"></div>
+        <div className="bg-element absolute -bottom-40 -left-40 w-80 h-80 bg-amber-800 rounded-full blur-3xl opacity-20"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-900 rounded-full blur-3xl opacity-10"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header dengan tombol like */}
         <div className="text-center mb-16 relative">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            About <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Me</span>
+            About <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">Me</span>
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-cyan-500 mx-auto mb-6 rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-yellow-500 mx-auto mb-6 rounded-full"></div>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mb-8">
             Crafting digital experiences with code, creativity, and cutting-edge technology
           </p>
@@ -506,8 +506,8 @@ const About = () => {
             <button
               onClick={handleLike}
               className={`like-button relative inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 ${isLiked 
-                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg' 
-                : 'bg-gray-800 text-gray-300 hover:text-white border border-gray-700 hover:border-red-500'
+                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
+                : 'bg-gray-800 text-gray-300 hover:text-white border border-gray-700 hover:border-orange-500'
               }`}
             >
               <i className={`bx ${isLiked ? 'bxs-heart' : 'bx-heart'} ${likeAnimation ? 'animate-heart-beat' : ''}`}></i>
@@ -530,7 +530,7 @@ const About = () => {
             </h3>
             
             <p className="text-gray-300 mb-8 leading-relaxed text-lg">
-              Passionate developer with <span className="text-purple-400 font-semibold">3+ years</span> of experience 
+              Passionate developer with <span className="text-orange-400 font-semibold">3+ years</span> of experience 
               creating immersive web experiences. I specialize in modern JavaScript frameworks, 
               interactive animations, and responsive design.
             </p>
@@ -545,7 +545,7 @@ const About = () => {
               {/* Skills */}
               <div>
                 <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3">
-                  <i className="bx bx-code-block text-purple-400"></i>
+                  <i className="bx bx-code-block text-orange-400"></i>
                   Technical Skills
                 </h4>
                 <div className="space-y-4">
@@ -553,10 +553,10 @@ const About = () => {
                     <div
                       key={skill.name}
                       ref={addToSkillsRefs}
-                      className="skill-item group cursor-pointer transform-style-3d p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 hover:border-purple-500 transition-all duration-300"
+                      className="skill-item group cursor-pointer transform-style-3d p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 hover:border-orange-500 transition-all duration-300"
                     >
                       <div className="flex items-center gap-3">
-                        <i className={`${skill.icon} text-purple-400 text-xl`}></i>
+                        <i className={`${skill.icon} text-orange-400 text-xl`}></i>
                         <span className="text-gray-300 font-medium text-lg">{skill.name}</span>
                       </div>
                     </div>
@@ -567,7 +567,7 @@ const About = () => {
               {/* Tools */}
               <div>
                 <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3">
-                  <i className="bx bx-cog text-cyan-400"></i>
+                  <i className="bx bx-cog text-yellow-400"></i>
                   Tools & Technologies
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
@@ -575,7 +575,7 @@ const About = () => {
                     <div
                       key={tool.name}
                       ref={addToToolsRefs}
-                      className="tool-item flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 cursor-pointer transform-style-3d hover:border-cyan-500 transition-all duration-300"
+                      className="tool-item flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 cursor-pointer transform-style-3d hover:border-yellow-500 transition-all duration-300"
                     >
                       <i className={`${tool.icon} ${tool.color} text-xl`}></i>
                       <span className="text-gray-300 text-sm font-medium">{tool.name}</span>
@@ -589,7 +589,7 @@ const About = () => {
             <div className="flex gap-4 flex-wrap">
               <a
                 href="#contact"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 flex items-center gap-3"
+                className="bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 flex items-center gap-3"
               >
                 <span>Get In Touch</span>
                 <i className="bx bx-chat text-xl"></i>
@@ -600,7 +600,7 @@ const About = () => {
                 href={projectsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-purple-500 hover:text-white hover:bg-purple-500/10 flex items-center gap-3 group"
+                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-orange-500 hover:text-white hover:bg-orange-500/10 flex items-center gap-3 group"
               >
                 <span>View Projects</span>
                 <i className="bx bx-folder-open text-xl group-hover:animate-pulse"></i>
@@ -612,7 +612,7 @@ const About = () => {
                 href="/resume.pdf" // Ganti dengan URL CV kamu
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-cyan-500 hover:text-white hover:bg-cyan-500/10 flex items-center gap-3"
+                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3"
               >
                 <span>Download CV</span>
                 <i className="bx bx-download text-xl"></i>
@@ -625,13 +625,13 @@ const About = () => {
             ref={imageContainerRef}
             className="relative cursor-pointer"
           >
-            {/* Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-full blur-xl opacity-20"></div>
+            {/* Glow Effect - Warna oranye */}
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-yellow-600 rounded-full blur-xl opacity-30"></div>
             
             {/* Main Image Container */}
             <div 
               ref={imageRef}
-              className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-transparent bg-gradient-to-r from-purple-500 to-cyan-500 p-1 transform-style-3d"
+              className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-transparent bg-gradient-to-r from-orange-500 to-yellow-500 p-1 transform-style-3d"
             >
               <div className="w-full h-full rounded-full overflow-hidden bg-[#0a0a0a]">
                 <img 
@@ -645,26 +645,26 @@ const About = () => {
               <div className="absolute inset-0 rounded-full border-2 border-white/10 pointer-events-none"></div>
             </div>
 
-            {/* Floating Elements yang ikut cursor */}
-            <div className="floating-element absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            {/* Floating Elements yang ikut cursor - Warna oranye/tema */}
+            <div className="floating-element absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
 
-            <div className="floating-element absolute -bottom-6 -left-6 w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            <div className="floating-element absolute -bottom-6 -left-6 w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-heart text-white text-xl"></i>
             </div>
 
             {/* Additional floating elements */}
-            <div className="floating-element absolute -top-8 left-8 w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl">
+            <div className="floating-element absolute -top-8 left-8 w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-star text-white text-lg"></i>
             </div>
 
-            <div className="floating-element absolute bottom-4 -right-8 w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            <div className="floating-element absolute bottom-4 -right-8 w-12 h-12 bg-gradient-to-br from-yellow-600 to-orange-600 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-rocket text-white text-lg"></i>
             </div>
 
             {/* Like Counter Badge di atas gambar */}
-            <div className="absolute -top-3 right-12 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-1 px-3 rounded-full text-sm font-bold shadow-lg transform-style-3d">
+            <div className="absolute -top-3 right-12 bg-gradient-to-r from-orange-600 to-red-600 text-white py-1 px-3 rounded-full text-sm font-bold shadow-lg transform-style-3d">
               <div className="flex items-center gap-1">
                 <i className="bx bx-heart text-xs"></i>
                 <span>{totalLikes}</span>
@@ -672,7 +672,7 @@ const About = () => {
             </div>
 
             {/* Experience Badge */}
-            <div className="absolute bottom-8 right-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
+            <div className="absolute bottom-8 right-8 bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
               <div className="flex items-center gap-2">
                 <i className="bx bx-award"></i>
                 <span>2+ Years Exp</span>
@@ -682,7 +682,7 @@ const About = () => {
             {/* Hover Instruction */}
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
               <p className="text-gray-400 text-sm flex items-center gap-2">
-                <i className="bx bx-mouse text-cyan-400"></i>
+                <i className="bx bx-mouse text-yellow-400"></i>
                 Hover for 3D effect
               </p>
             </div>
@@ -702,8 +702,8 @@ const About = () => {
               ref={addToStatsRefs}
               className="text-center group cursor-pointer transform-style-3d"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-to-br group-hover:from-purple-500/30 group-hover:to-cyan-500/30 transition-all duration-300">
-                <i className={`${stat.icon} text-2xl text-cyan-400`}></i>
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-to-br group-hover:from-orange-500/30 group-hover:to-yellow-500/30 transition-all duration-300">
+                <i className={`${stat.icon} text-2xl text-yellow-400`}></i>
               </div>
               <h4 className="text-2xl font-bold text-white mb-2">{stat.number}</h4>
               <p className="text-gray-400 text-sm">{stat.label}</p>
