@@ -607,16 +607,28 @@ const About = () => {
                 <i className="bx bx-link-external text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
               </a>
               
-              {/* Tombol Download CV (opsional) */}
-              <a
-                href="/resume.pdf" // Ganti dengan URL CV kamu
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3"
+              {/* Tombol Download CV - Scroll ke Resume section lalu auto-download */}
+              <button
+                onClick={() => {
+                  // Scroll ke resume section
+                  const resumeSection = document.getElementById('resume');
+                  if (resumeSection) {
+                    resumeSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Tunggu 1 detik untuk scroll selesai, lalu trigger download
+                    setTimeout(() => {
+                      const downloadBtn = document.querySelector('#resume button[onclick*="downloadPDF"]');
+                      if (downloadBtn) {
+                        downloadBtn.click();
+                      }
+                    }, 1000);
+                  }
+                }}
+                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group cursor-pointer"
               >
                 <span>Download CV</span>
-                <i className="bx bx-download text-xl"></i>
-              </a>
+                <i className="bx bx-download text-xl group-hover:animate-bounce"></i>
+              </button>
             </div>
           </div>
 
