@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -66,6 +66,20 @@ export default function Resume() {
       }
     ]
   };
+
+  // Auto-download ketika navigasi dari About section
+  useEffect(() => {
+    // Cek jika ada trigger auto download dari About section
+    const autoDownload = localStorage.getItem('autoDownloadCV');
+    if (autoDownload === 'true') {
+      // Tunggu sebentar untuk rendering selesai
+      setTimeout(() => {
+        downloadPDF();
+        // Hapus trigger setelah download
+        localStorage.removeItem('autoDownloadCV');
+      }, 1000);
+    }
+  }, []);
 
   const downloadPDF = async () => {
     if (!resumeRef.current) return;
