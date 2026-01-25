@@ -614,9 +614,8 @@ const Contact = () => {
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-800">
               {[
-                { number: "24h", label: "Response Time" },
-                { number: "100%", label: "Availability" },
-                { number: "50+", label: "Projects" }
+                { number: "Anytime", label: "Response Time" },
+                { number: "100%", label: "Availability" }
               ].map((stat, index) => (
                 <div key={stat.label} className="text-center transform-style-3d">
                   <div className="text-lg font-bold text-white mb-1">{stat.number}</div>
@@ -763,3 +762,4 @@ const Contact = () => {
 };
 
 export default Contact;
+
