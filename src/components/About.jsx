@@ -2,7 +2,6 @@ import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
@@ -15,73 +14,27 @@ const About = () => {
   const statsRef = useRef([]);
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeAnimation, setLikeAnimation] = useState(false);
-  const [totalLikes, setTotalLikes] = useState(0);
+  const [isCvLoading, setIsCvLoading] = useState(false);
+  const [isProjectsLoading, setIsProjectsLoading] = useState(false);
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   
   const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
 
-  useEffect(() => {
-    const liked = localStorage.getItem('aboutSectionLiked') === 'true';
-    setIsLiked(liked);
+  const handleCvClick = () => {
+    setIsCvLoading(true);
     
-    const storedLikes = localStorage.getItem('aboutSectionTotalLikes');
-    if (storedLikes) {
-      setTotalLikes(parseInt(storedLikes));
-    } else {
-      const randomLikes = Math.floor(Math.random() * 30) + 10;
-      setTotalLikes(randomLikes);
-      localStorage.setItem('aboutSectionTotalLikes', randomLikes.toString());
-    }
-  }, []);
+    setTimeout(() => {
+      setIsCvLoading(false);
+    }, 3000);
+  };
 
-  const createConfetti = () => {
-    const confettiContainer = document.querySelector('.confetti-container');
-    if (!confettiContainer) return;
-
-    confettiContainer.innerHTML = '';
-
-    const colors = ['#ff6b6b', '#ffa500', '#ff8c00', '#ffcc00', '#ff9800', '#ff5722'];
+  const handleProjectsClick = () => {
+    setIsProjectsLoading(true);
     
-    for (let i = 0; i < 20; i++) {
-      const confetti = document.createElement('div');
-      confetti.className = 'confetti';
-      confetti.style.cssText = `
-        position: absolute;
-        width: 8px;
-        height: 8px;
-        background: ${colors[Math.floor(Math.random() * colors.length)]};
-        top: 50%;
-        left: 50%;
-        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
-        opacity: 0;
-      `;
-
-      confettiContainer.appendChild(confetti);
-
-      gsap.to(confetti, {
-        x: (Math.random() - 0.5) * 100,
-        y: (Math.random() - 0.5) * 100,
-        rotation: Math.random() * 360,
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out"
-      });
-
-      gsap.to(confetti, {
-        opacity: 0,
-        y: '+=20',
-        duration: 0.5,
-        delay: 0.5,
-        onComplete: () => {
-          if (confetti.parentNode === confettiContainer) {
-            confettiContainer.removeChild(confetti);
-          }
-        }
-      });
-    }
+    setTimeout(() => {
+      setIsProjectsLoading(false);
+    }, 3000);
   };
 
   const skills = [
@@ -100,18 +53,16 @@ const About = () => {
     { name: "Netlify / Vercel", icon: "bx bx-cloud-upload", color: "text-yellow-400" },
   ];
 
-  // Mouse move handler untuk 3D effect
   const handleMouseMove = (e) => {
     if (!imageContainerRef.current) return;
     
     const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - left) / width - 0.5) * 2; // -1 to 1
-    const y = ((e.clientY - top) / height - 0.5) * 2; // -1 to 1
+    const x = ((e.clientX - left) / width - 0.5) * 2;
+    const y = ((e.clientY - top) / height - 0.5) * 2;
     
     setMousePosition({ x, y });
   };
 
-  // Add to ref arrays
   const addToSkillsRefs = (el) => {
     if (el && !skillsRef.current.includes(el)) {
       skillsRef.current.push(el);
@@ -131,14 +82,12 @@ const About = () => {
   };
 
   useEffect(() => {
-    // Add mouse move event listener
     if (imageContainerRef.current) {
       imageContainerRef.current.addEventListener('mousemove', handleMouseMove);
       imageContainerRef.current.addEventListener('mouseleave', handleMouseLeave);
     }
 
     const ctx = gsap.context(() => {
-      // Section entrance animation
       gsap.fromTo(sectionRef.current,
         { 
           opacity: 0,
@@ -157,7 +106,6 @@ const About = () => {
         }
       );
 
-      // 3D Image Animation - Initial entrance
       gsap.fromTo(imageRef.current,
         {
           rotationY: -30,
@@ -182,7 +130,6 @@ const About = () => {
         }
       );
 
-      // Text content animation
       gsap.fromTo(textRef.current,
         {
           x: -100,
@@ -202,7 +149,6 @@ const About = () => {
         }
       );
 
-      // Skills animation
       skillsRef.current.forEach((skill, index) => {
         gsap.fromTo(skill,
           {
@@ -229,7 +175,6 @@ const About = () => {
           }
         );
 
-        // Hover effect untuk skills
         skill.addEventListener('mouseenter', () => {
           gsap.to(skill, {
             rotationY: 5,
@@ -253,7 +198,6 @@ const About = () => {
         });
       });
 
-      // Tools animation
       toolsRef.current.forEach((tool, index) => {
         gsap.fromTo(tool,
           {
@@ -278,7 +222,6 @@ const About = () => {
           }
         );
 
-        // Hover effect untuk tools
         tool.addEventListener('mouseenter', () => {
           gsap.to(tool, {
             rotationY: 10,
@@ -300,7 +243,6 @@ const About = () => {
         });
       });
 
-      // Stats counter animation
       statsRef.current.forEach((stat, index) => {
         gsap.fromTo(stat,
           {
@@ -327,7 +269,6 @@ const About = () => {
           }
         );
 
-        // Hover effect untuk stats
         stat.addEventListener('mouseenter', () => {
           gsap.to(stat, {
             rotationY: 15,
@@ -347,7 +288,6 @@ const About = () => {
         });
       });
 
-      // Floating elements animation
       const floatingElements = sectionRef.current.querySelectorAll('.floating-element');
       floatingElements.forEach((element, index) => {
         gsap.to(element, {
@@ -361,7 +301,6 @@ const About = () => {
         });
       });
 
-      // Background elements parallax
       const bgElements = sectionRef.current.querySelectorAll('.bg-element');
       bgElements.forEach((element, index) => {
         gsap.to(element, {
@@ -385,13 +324,11 @@ const About = () => {
     };
   }, []);
 
-  // Effect untuk handle 3D cursor follow
   useEffect(() => {
     if (!imageRef.current) return;
 
     const { x, y } = mousePosition;
     
-    // Smooth 3D rotation berdasarkan posisi cursor
     gsap.to(imageRef.current, {
       rotationY: x * 15,
       rotationX: -y * 10,
@@ -401,7 +338,6 @@ const About = () => {
       ease: "power2.out"
     });
 
-    // Efek parallax untuk floating elements
     const floatingElements = document.querySelectorAll('.floating-element');
     floatingElements.forEach((element, index) => {
       gsap.to(element, {
@@ -415,7 +351,6 @@ const About = () => {
 
   }, [mousePosition]);
 
-  // Reset rotation ketika mouse leave
   const handleMouseLeave = () => {
     setMousePosition({ x: 0, y: 0 });
     
@@ -428,7 +363,6 @@ const About = () => {
       ease: "elastic.out(1, 0.5)"
     });
 
-    // Reset floating elements juga
     const floatingElements = document.querySelectorAll('.floating-element');
     floatingElements.forEach((element) => {
       gsap.to(element, {
@@ -443,10 +377,6 @@ const About = () => {
 
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
-      {/* Container untuk confetti */}
-      <div className="confetti-container absolute inset-0 pointer-events-none z-0"></div>
-      
-      {/* Background Elements - Warna oranye */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-element absolute -top-40 -right-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20"></div>
         <div className="bg-element absolute -bottom-40 -left-40 w-80 h-80 bg-amber-800 rounded-full blur-3xl opacity-20"></div>
@@ -454,7 +384,6 @@ const About = () => {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Section Header dengan tombol like */}
         <div className="text-center mb-16 relative">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
             About <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">Me</span>
@@ -465,9 +394,7 @@ const About = () => {
           </p>
         </div>
 
-        {/* Content Grid */}
         <div className="flex flex-col lg:flex-row items-center gap-16">
-          {/* Text Content */}
           <div ref={textRef} className="flex-1">
             <h3 className="text-3xl font-bold mb-6 tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               Creative Full-Stack Developer
@@ -484,9 +411,7 @@ const About = () => {
               open-source projects, or creating tutorial content.
             </p>
 
-            {/* Skills & Tools Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 mb-10">
-              {/* Skills */}
               <div>
                 <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3">
                   <i className="bx bx-code-block text-orange-400"></i>
@@ -508,7 +433,6 @@ const About = () => {
                 </div>
               </div>
 
-              {/* Tools */}
               <div>
                 <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3">
                   <i className="bx bx-cog text-yellow-400"></i>
@@ -529,7 +453,6 @@ const About = () => {
               </div>
             </div>
 
-            {/* CTA Buttons */}
             <div className="flex gap-4 flex-wrap">
               <a
                 href="#contact"
@@ -539,49 +462,59 @@ const About = () => {
                 <i className="bx bx-chat text-xl"></i>
               </a>
               
-              {/* Tombol View Projects dengan URL eksternal */}
               <a
                 href={projectsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-orange-500 hover:text-white hover:bg-orange-500/10 flex items-center gap-3 group"
+                onClick={handleProjectsClick}
+                className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-orange-500 hover:text-white hover:bg-orange-500/10 flex items-center gap-3 group ${
+                  isProjectsLoading ? 'pointer-events-none opacity-75' : ''
+                }`}
               >
-                <span>View Projects</span>
-                <i className="bx bx-folder-open text-xl group-hover:animate-pulse"></i>
-                <i className="bx bx-link-external text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                {isProjectsLoading ? (
+                  <>
+                    <span>Opening Projects...</span>
+                    <i className="bx bx-loader-alt animate-spin text-xl"></i>
+                  </>
+                ) : (
+                  <>
+                    <span>View Projects</span>
+                    <i className="bx bx-folder-open text-xl group-hover:animate-pulse"></i>
+                    <i className="bx bx-link-external text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </>
+                )}
               </a>
               
-              {/* Tombol Download CV - Langsung ke Google Drive */}
               <a
                 href={cvDriveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group"
-                onClick={(e) => {
-                  // Tambahkan animasi loading
-                  e.currentTarget.innerHTML = '<span>Downloading...</span><i class="bx bx-loader-alt animate-spin text-xl"></i>';
-                  
-                  // Reset button setelah 3 detik
-                  setTimeout(() => {
-                    e.currentTarget.innerHTML = '<span>Download CV</span><i class="bx bx-download text-xl group-hover:animate-bounce"></i>';
-                  }, 3000);
-                }}
+                onClick={handleCvClick}
+                className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group ${
+                  isCvLoading ? 'pointer-events-none opacity-75' : ''
+                }`}
               >
-                <span>Download CV</span>
-                <i className="bx bx-download text-xl group-hover:animate-bounce"></i>
+                {isCvLoading ? (
+                  <>
+                    <span>Opening CV...</span>
+                    <i className="bx bx-loader-alt animate-spin text-xl"></i>
+                  </>
+                ) : (
+                  <>
+                    <span>Download CV</span>
+                    <i className="bx bx-download text-xl group-hover:animate-bounce"></i>
+                  </>
+                )}
               </a>
             </div>
           </div>
 
-          {/* Profile Image dengan 3D Cursor Follow */}
           <div 
             ref={imageContainerRef}
             className="relative cursor-pointer"
           >
-            {/* Glow Effect - Warna oranye */}
             <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-yellow-600 rounded-full blur-xl opacity-30"></div>
             
-            {/* Main Image Container */}
             <div 
               ref={imageRef}
               className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-transparent bg-gradient-to-r from-orange-500 to-yellow-500 p-1 transform-style-3d"
@@ -594,11 +527,9 @@ const About = () => {
                 />
               </div>
               
-              {/* Inner Glow Effect */}
               <div className="absolute inset-0 rounded-full border-2 border-white/10 pointer-events-none"></div>
             </div>
 
-            {/* Floating Elements yang ikut cursor - Warna oranye/tema */}
             <div className="floating-element absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
@@ -607,7 +538,6 @@ const About = () => {
               <i className="bx bx-heart text-white text-xl"></i>
             </div>
 
-            {/* Additional floating elements */}
             <div className="floating-element absolute -top-8 left-8 w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-star text-white text-lg"></i>
             </div>
@@ -616,15 +546,6 @@ const About = () => {
               <i className="bx bx-rocket text-white text-lg"></i>
             </div>
 
-            {/* Like Counter Badge di atas gambar */}
-            <div className="absolute -top-3 right-12 bg-gradient-to-r from-orange-600 to-red-600 text-white py-1 px-3 rounded-full text-sm font-bold shadow-lg transform-style-3d">
-              <div className="flex items-center gap-1">
-                <i className="bx bx-heart text-xs"></i>
-                <span>{totalLikes}</span>
-              </div>
-            </div>
-
-            {/* Experience Badge */}
             <div className="absolute bottom-8 right-8 bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
               <div className="flex items-center gap-2">
                 <i className="bx bx-award"></i>
@@ -632,7 +553,6 @@ const About = () => {
               </div>
             </div>
 
-            {/* Hover Instruction */}
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
               <p className="text-gray-400 text-sm flex items-center gap-2">
                 <i className="bx bx-mouse text-yellow-400"></i>
@@ -642,12 +562,11 @@ const About = () => {
           </div>
         </div>
 
-        {/* Fun Facts */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-gray-800">
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
             { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
-            { number: totalLikes.toString(), label: "Total Likes", icon: "bx bx-heart" },
+            { number: "5+", label: "Happy Clients", icon: "bx bx-user" },
             { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" }
           ].map((stat, index) => (
             <div
@@ -671,24 +590,10 @@ const About = () => {
           perspective: 1000px;
         }
         
-        /* Smooth transitions untuk semua transform */
         .floating-element,
         .skill-item,
         .tool-item {
           transition: transform 0.3s ease;
-        }
-
-        /* Animasi untuk like button */
-        @keyframes heartBeat {
-          0% { transform: scale(1); }
-          25% { transform: scale(1.3); }
-          50% { transform: scale(1); }
-          75% { transform: scale(1.2); }
-          100% { transform: scale(1); }
-        }
-
-        .animate-heart-beat {
-          animation: heartBeat 0.8s ease-in-out;
         }
       `}</style>
     </section>
