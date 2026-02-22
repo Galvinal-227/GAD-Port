@@ -19,18 +19,14 @@ const About = () => {
   const [likeAnimation, setLikeAnimation] = useState(false);
   const [totalLikes, setTotalLikes] = useState(0);
 
-  // State untuk project URL
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   
-  // Link Google Drive untuk CV (GANTI DENGAN LINK DRIVE KAMU)
-  const cvDriveUrl = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE";
+  const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
 
-  // Initialize dari localStorage
   useEffect(() => {
     const liked = localStorage.getItem('aboutSectionLiked') === 'true';
     setIsLiked(liked);
     
-    // Get total likes dari localStorage
     const storedLikes = localStorage.getItem('aboutSectionTotalLikes');
     if (storedLikes) {
       setTotalLikes(parseInt(storedLikes));
@@ -41,42 +37,6 @@ const About = () => {
     }
   }, []);
 
-  // Fungsi untuk handle like
-  const handleLike = () => {
-    const newLikedState = !isLiked;
-    setIsLiked(newLikedState);
-    localStorage.setItem('aboutSectionLiked', newLikedState.toString());
-    
-    // Update total likes
-    let newTotalLikes = totalLikes;
-    if (newLikedState) {
-      newTotalLikes += 1;
-    } else {
-      newTotalLikes = Math.max(0, newTotalLikes - 1);
-    }
-    
-    setTotalLikes(newTotalLikes);
-    localStorage.setItem('aboutSectionTotalLikes', newTotalLikes.toString());
-    
-    // Trigger animation
-    setLikeAnimation(true);
-    setTimeout(() => setLikeAnimation(false), 1000);
-    
-    // Animation effect
-    gsap.to('.like-button', {
-      scale: newLikedState ? 1.3 : 0.9,
-      duration: 0.2,
-      yoyo: true,
-      repeat: 1,
-      ease: "power2.out"
-    });
-    
-    if (newLikedState) {
-      createConfetti();
-    }
-  };
-
-  // Fungsi untuk membuat efek confetti
   const createConfetti = () => {
     const confettiContainer = document.querySelector('.confetti-container');
     if (!confettiContainer) return;
@@ -503,25 +463,6 @@ const About = () => {
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mb-8">
             Crafting digital experiences with code, creativity, and cutting-edge technology
           </p>
-          
-          {/* Hanya Like Button Sederhana */}
-          <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={handleLike}
-              className={`like-button relative inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 ${isLiked 
-                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' 
-                : 'bg-gray-800 text-gray-300 hover:text-white border border-gray-700 hover:border-orange-500'
-              }`}
-            >
-              <i className={`bx ${isLiked ? 'bxs-heart' : 'bx-heart'} ${likeAnimation ? 'animate-heart-beat' : ''}`}></i>
-              <span className="text-sm">{isLiked ? 'Liked' : 'Like'}</span>
-            </button>
-            
-            {/* Status kecil di bawahnya */}
-            <div className="text-xs text-gray-500">
-              {isLiked ? '✓ You liked this section' : 'Click to like'}
-            </div>
-          </div>
         </div>
 
         {/* Content Grid */}
