@@ -1,8 +1,13 @@
 import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef(null);
   const logoRef = useRef(null);
   const navItemsRef = useRef([]);
@@ -30,6 +35,76 @@ const Header = () => {
     }
   };
 
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      if (scrollPosition > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Header scroll animation
+  useEffect(() => {
+    if (isScrolled) {
+      // Header mengecil saat scroll
+      gsap.to(headerRef.current, {
+        paddingTop: '0.75rem',
+        paddingBottom: '0.75rem',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+
+      // Logo mengecil
+      gsap.to(logoRef.current, {
+        fontSize: '1.5rem',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+
+      // Nav items mengecil
+      gsap.to(navItemsRef.current, {
+        fontSize: '0.875rem',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+
+    } else {
+      // Kembali ke ukuran normal
+      gsap.to(headerRef.current, {
+        paddingTop: '1.5rem',
+        paddingBottom: '1.5rem',
+        backgroundColor: 'rgba(0, 0, 0, 1)',
+        boxShadow: 'none',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+
+      // Logo kembali ke ukuran normal
+      gsap.to(logoRef.current, {
+        fontSize: '2rem',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+
+      // Nav items kembali ke ukuran normal
+      gsap.to(navItemsRef.current, {
+        fontSize: '1rem',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+    }
+  }, [isScrolled]);
+
+  // Initial animations
   useEffect(() => {
     // Header slide down animation
     gsap.fromTo(headerRef.current,
@@ -76,6 +151,59 @@ const Header = () => {
       }
     );
 
+    // ScrollTrigger animations for sections
+    const sections = ['home', 'about', 'contact'].map(id => document.getElementById(id));
+    
+    sections.forEach((section, index) => {
+      if (section) {
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top center',
+          end: 'bottom center',
+          onEnter: () => {
+            // Highlight nav item when section enters viewport
+            gsap.to(navItemsRef.current[index], {
+              color: '#ffffff',
+              scale: 1.1,
+              duration: 0.3,
+              ease: 'power2.out'
+            });
+          },
+          onLeave: () => {
+            // Reset nav item when section leaves viewport
+            gsap.to(navItemsRef.current[index], {
+              color: '#ffffff',
+              scale: 1,
+              duration: 0.3,
+              ease: 'power2.out'
+            });
+          },
+          onEnterBack: () => {
+            // Highlight nav item when section enters viewport from bottom
+            gsap.to(navItemsRef.current[index], {
+              color: '#ffffff',
+              scale: 1.1,
+              duration: 0.3,
+              ease: 'power2.out'
+            });
+          },
+          onLeaveBack: () => {
+            // Reset nav item when section leaves viewport from top
+            gsap.to(navItemsRef.current[index], {
+              color: '#ffffff',
+              scale: 1,
+              duration: 0.3,
+              ease: 'power2.out'
+            });
+          }
+        });
+      }
+    });
+
+    // Cleanup ScrollTrigger
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
   useEffect(() => {
@@ -129,13 +257,13 @@ const Header = () => {
   return (
     <header 
       ref={headerRef}
-      className="flex justify-between items-center py-6 px-4 lg:px-20 fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800"
+      className="flex justify-between items-center py-6 px-4 lg:px-20 fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800 transition-all duration-300"
       style={{ opacity: 0 }}
     >
       {/* Logo */}
       <h1 
         ref={logoRef}
-        className="text-2xl md:text-3xl font-light text-white cursor-pointer"
+        className="text-2xl md:text-3xl font-light text-white cursor-pointer transition-all duration-300"
         style={{ opacity: 0 }}
         onClick={() => handleNavClick({ preventDefault: () => {} }, 'home')}
       >
@@ -152,7 +280,7 @@ const Header = () => {
           <a
             key={item.id}
             ref={addToNavRefs}
-            className="text-white hover:text-gray-300 transition-colors text-sm relative group cursor-pointer"
+            className="text-white hover:text-gray-300 transition-all duration-300 text-sm relative group cursor-pointer"
             href={`#${item.id}`}
             onClick={(e) => handleNavClick(e, item.id)}
             style={{ opacity: 0 }}
@@ -172,7 +300,7 @@ const Header = () => {
         ☰
       </button>
 
-      {/* Mobile Menu - BACKGROUND HITAM */}
+      {/* Mobile Menu */}
       <div 
         ref={mobileMenuRef}
         className="fixed top-0 left-0 w-full h-full bg-black z-50 md:hidden"
@@ -183,7 +311,7 @@ const Header = () => {
       >
         {/* Header Mobile Menu */}
         <div className="flex justify-between items-center p-6 border-b border-gray-800 bg-black">
-          <h1 className="text-2xl text-white">GAD</h1>
+          <h1 className="text-2xl text-white">ALDEV</h1>
           <button 
             className="text-white text-2xl"
             onClick={closeMobileMenu}
@@ -192,7 +320,7 @@ const Header = () => {
           </button>
         </div>
         
-        {/* Navigation Items - BACKGROUND HITAM */}
+        {/* Navigation Items */}
         <nav className="flex flex-col gap-0 p-0 bg-black">
           {[
             { name: 'Home', id: 'home' },
@@ -216,7 +344,4 @@ const Header = () => {
   );
 };
 
-
 export default Header;
-
-
