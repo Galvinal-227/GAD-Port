@@ -7,6 +7,7 @@ import Hero from './components/Hero';
 import About from './components/About';
 import Contact from './components/Contact';
 import Loading from './components/Loading';
+import SplineGame from './components/SplineGame';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -51,6 +52,7 @@ function App() {
                 </>
               } 
             />
+            <Route path="/game" element={<SplineGame />} />
           </Routes>
 
         </div>
