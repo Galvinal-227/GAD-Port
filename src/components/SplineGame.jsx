@@ -24,10 +24,13 @@ const SplineGame = ({ onExit }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [splineLoaded, setSplineLoaded] = useState(false);
+  
   const gameContainerRef = useRef(null);
-  const splineViewerRef = useRef(null);
+  const splineContainerRef = useRef(null);
   const gameAreaRef = useRef(null);
   const scriptRef = useRef(null);
+  const splineInstanceRef = useRef(null);
 
   // Deteksi device mobile
   useEffect(() => {
@@ -41,98 +44,98 @@ const SplineGame = ({ onExit }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load Spline viewer script dengan cleanup yang lebih baik
+  // Load Spline viewer script dengan cleanup yang benar
   useEffect(() => {
-    // Hapus script lama jika ada
-    const oldScript = document.querySelector('script[src*="spline-viewer"]');
-    if (oldScript) {
-      document.head.removeChild(oldScript);
-    }
+    let mounted = true;
+    
+    const loadSpline = async () => {
+      // Hapus script lama jika ada
+      const oldScript = document.querySelector('script[src*="spline-viewer"]');
+      if (oldScript) {
+        document.head.removeChild(oldScript);
+      }
 
-    // Buat script baru
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'https://unpkg.com/@splinetool/viewer@1.12.60/build/spline-viewer.js';
-    scriptRef.current = script;
-    document.head.appendChild(script);
+      // Buat script baru
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://unpkg.com/@splinetool/viewer@1.12.60/build/spline-viewer.js';
+      scriptRef.current = script;
+      
+      script.onload = () => {
+        if (mounted) {
+          setSplineLoaded(true);
+        }
+      };
+      
+      document.head.appendChild(script);
+    };
+
+    loadSpline();
 
     // Cleanup function yang komprehensif
     return () => {
-      console.log('Cleaning up SplineGame...');
+      mounted = false;
       
-      // 1. Hapus script
+      // Hapus script
       if (scriptRef.current && document.head.contains(scriptRef.current)) {
         document.head.removeChild(scriptRef.current);
       }
 
-      // 2. Hapus semua instance spline-viewer
-      const splineViewers = document.querySelectorAll('spline-viewer');
-      splineViewers.forEach(viewer => {
-        if (viewer && viewer.parentNode) {
-          // Hentikan semua animasi dan audio di dalam viewer
-          if (viewer.shadowRoot) {
-            const videos = viewer.shadowRoot.querySelectorAll('video');
-            videos.forEach(video => {
-              video.pause();
-              video.src = '';
-              video.load();
-            });
-            
-            const audios = viewer.shadowRoot.querySelectorAll('audio');
-            audios.forEach(audio => {
-              audio.pause();
-              audio.src = '';
-              audio.load();
-            });
-          }
-          
-          viewer.remove(); // Hapus dari DOM
-        }
-      });
+      // Hancurkan semua instance Spline dengan benar
+      if (splineContainerRef.current) {
+        const splineViewers = splineContainerRef.current.querySelectorAll('spline-viewer');
+        splineViewers.forEach(viewer => {
+          try {
+            // Hentikan semua animasi
+            if (viewer.shadowRoot) {
+              // Hentikan semua audio/video di shadow DOM
+              const mediaElements = viewer.shadowRoot.querySelectorAll('audio, video');
+              mediaElements.forEach(media => {
+                media.pause();
+                media.src = '';
+                media.load();
+              });
 
-      // 3. Hapus semua canvas yang mungkin dibuat oleh Spline
-      const canvases = document.querySelectorAll('canvas');
-      canvases.forEach(canvas => {
-        if (canvas && canvas.parentNode && 
-            !canvas.closest('.spline-game-wrapper')) {
-          // Hanya hapus canvas yang bukan bagian dari komponen lain
-          const context = canvas.getContext('webgl') || canvas.getContext('2d');
-          if (context) {
-            // Bersihkan context
-            const gl = context;
-            if (gl && gl.getExtension) {
-              const loseContext = gl.getExtension('WEBGL_lose_context');
-              if (loseContext) loseContext.loseContext();
+              // Hancurkan WebGL context
+              const canvases = viewer.shadowRoot.querySelectorAll('canvas');
+              canvases.forEach(canvas => {
+                const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
+                if (gl) {
+                  const loseContext = gl.getExtension('WEBGL_lose_context');
+                  if (loseContext) loseContext.loseContext();
+                }
+              });
+            }
+            
+            // Hapus viewer dari DOM
+            viewer.remove();
+          } catch (e) {
+            console.warn('Error cleaning up spline viewer:', e);
+          }
+        });
+      }
+
+      // Bersihkan semua canvas yang mungkin tertinggal
+      setTimeout(() => {
+        const canvases = document.querySelectorAll('canvas');
+        canvases.forEach(canvas => {
+          if (canvas && canvas.parentNode && 
+              !canvas.closest('.spline-game-wrapper')) {
+            try {
+              const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
+              if (gl) {
+                const loseContext = gl.getExtension('WEBGL_lose_context');
+                if (loseContext) loseContext.loseContext();
+              }
+              canvas.remove();
+            } catch (e) {
+              // Abaikan error
             }
           }
-          canvas.remove();
-        }
-      });
-
-      // 4. Hentikan semua audio di document
-      const audioElements = document.querySelectorAll('audio');
-      audioElements.forEach(audio => {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.src = '';
-        audio.load();
-      });
-
-      // 5. Hentikan semua video
-      const videoElements = document.querySelectorAll('video');
-      videoElements.forEach(video => {
-        video.pause();
-        video.currentTime = 0;
-        video.src = '';
-        video.load();
-      });
-
-      // 6. Bersihkan event listeners
-      window.removeEventListener('keydown', handleKeyDown);
-      
-      console.log('SplineGame cleanup complete');
+        });
+      }, 100);
     };
-  }, []); // Empty dependency array
+  }, []);
 
   // Handle keyboard controls
   const handleKeyDown = (e) => {
@@ -140,23 +143,11 @@ const SplineGame = ({ onExit }) => {
     
     const key = e.key.toLowerCase();
     
-    // WASD controls untuk movement
-    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key) || 
-        key.includes('arrow')) {
+    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
       e.preventDefault();
-      
-      // Visual feedback
-      if (gameContainerRef.current) {
-        gameContainerRef.current.classList.add(`key-${key}`);
-        setTimeout(() => {
-          gameContainerRef.current.classList.remove(`key-${key}`);
-        }, 100);
-      }
     }
     
-    // Escape untuk keluar game
     if (key === 'escape') {
-      console.log('ESC pressed, exiting game...');
       e.preventDefault();
       handleExit();
     }
@@ -166,7 +157,6 @@ const SplineGame = ({ onExit }) => {
     if (isGameActive) {
       window.addEventListener('keydown', handleKeyDown);
     }
-    
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -187,7 +177,6 @@ const SplineGame = ({ onExit }) => {
     }
   };
 
-  // Listen for fullscreen change
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -197,111 +186,78 @@ const SplineGame = ({ onExit }) => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Start game
   const startGame = () => {
     setIsGameActive(true);
     setShowControls(true);
   };
 
-  // Exit game dengan force refresh
+  // Exit game tanpa refresh
   const handleExit = () => {
-    console.log('handleExit called');
+    console.log('Exiting game...');
     
-    // 1. Nonaktifkan game
+    // Nonaktifkan game
     setIsGameActive(false);
     
-    // 2. Keluar dari fullscreen
+    // Keluar dari fullscreen
     if (document.fullscreenElement) {
-      document.exitFullscreen()
-        .then(() => {
-          setIsFullscreen(false);
-        })
-        .catch(err => {
-          console.error('Error exiting fullscreen:', err);
-        });
+      document.exitFullscreen().catch(console.warn);
     }
     
-    // 3. Hentikan semua suara dengan paksa
-    const stopAllAudio = () => {
-      // Hentikan audio di document
-      const audioElements = document.querySelectorAll('audio');
-      audioElements.forEach(audio => {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.src = '';
-        audio.load();
+    // Hentikan semua media dengan paksa
+    const stopAllMedia = () => {
+      // Audio elements
+      document.querySelectorAll('audio').forEach(audio => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.src = '';
+          audio.load();
+        } catch (e) {}
       });
 
-      // Hentikan video
-      const videoElements = document.querySelectorAll('video');
-      videoElements.forEach(video => {
-        video.pause();
-        video.currentTime = 0;
-        video.src = '';
-        video.load();
+      // Video elements
+      document.querySelectorAll('video').forEach(video => {
+        try {
+          video.pause();
+          video.currentTime = 0;
+          video.src = '';
+          video.load();
+        } catch (e) {}
       });
 
-      // Hentikan audio di shadow DOM spline-viewer
-      const splineViewers = document.querySelectorAll('spline-viewer');
-      splineViewers.forEach(viewer => {
+      // Shadow DOM media
+      document.querySelectorAll('spline-viewer').forEach(viewer => {
         if (viewer.shadowRoot) {
-          const audios = viewer.shadowRoot.querySelectorAll('audio');
-          audios.forEach(audio => {
-            audio.pause();
-            audio.src = '';
-            audio.load();
+          viewer.shadowRoot.querySelectorAll('audio, video').forEach(media => {
+            try {
+              media.pause();
+              media.src = '';
+              media.load();
+            } catch (e) {}
           });
         }
       });
     };
 
-    stopAllAudio();
+    stopAllMedia();
     
-    // 4. Reset show controls
+    // Reset state
     setShowControls(true);
     
-    // 5. Force refresh dengan mengganti URL (opsional)
-    // Ini akan memaksa React untuk me-render ulang komponen
-    window.location.hash = '#game-exit';
-    
-    // 6. Panggil onExit untuk kembali ke home
+    // Panggil onExit
     if (onExit) {
-      console.log('Calling onExit to return to home...');
-      // Beri sedikit delay untuk memastikan cleanup selesai
       setTimeout(() => {
         onExit();
-        
-        // 7. Force refresh halaman home (opsional - uncomment jika masih ada suara)
-        // window.location.reload();
-      }, 100);
+      }, 50);
     }
   };
 
-  // Toggle controls info
   const toggleControls = () => {
     setShowControls(!showControls);
   };
 
-  // Handle mobile control clicks
-  const handleMobileControl = (action, value) => {
-    console.log(`Mobile control: ${action} - ${value}`);
-    
-    // Integrasi dengan Spline events
-    if (splineViewerRef.current) {
-      const spline = splineViewerRef.current.querySelector('spline-viewer');
-      if (spline) {
-        // Dispatch custom event ke spline
-        const event = new CustomEvent('mobile-control', { 
-          detail: { action, value } 
-        });
-        spline.dispatchEvent(event);
-      }
-    }
-  };
-
   return (
     <div className="spline-game-wrapper" ref={gameContainerRef}>
-      {/* Exit Button */}
       <button 
         className="exit-game-btn"
         onClick={handleExit}
@@ -312,7 +268,6 @@ const SplineGame = ({ onExit }) => {
         <span className="exit-shortcut">ESC</span>
       </button>
 
-      {/* Game Header */}
       <div className="game-header">
         <div className="header-left">
           <Gamepad2 className="game-icon" size={24} />
@@ -326,9 +281,6 @@ const SplineGame = ({ onExit }) => {
             title={showControls ? "Hide Controls" : "Show Controls"}
           >
             {showControls ? <EyeOff size={20} /> : <Eye size={20} />}
-            <span className="btn-text">
-              {showControls ? "Hide" : "Show"} Controls
-            </span>
           </button>
           
           <button 
@@ -341,15 +293,24 @@ const SplineGame = ({ onExit }) => {
         </div>
       </div>
 
-      {/* Game Area */}
       <div className="game-area" ref={gameAreaRef}>
-        {/* Spline Viewer */}
-        <div ref={splineViewerRef}>
-          <spline-viewer 
-            url="https://prod.spline.design/vGKXmWGYvDFjZ7z8/scene.splinecode"
-            loading-animation
-            className="spline-viewer"
-          ></spline-viewer>
+        {/* Spline Container dengan key unik */}
+        <div 
+          key={isGameActive ? 'spline-active' : 'spline-inactive'}
+          ref={splineContainerRef}
+          style={{ width: '100%', height: '100%' }}
+        >
+          {splineLoaded && (
+            <spline-viewer 
+              url="https://prod.spline.design/vGKXmWGYvDFjZ7z8/scene.splinecode"
+              loading-animation
+              className="spline-viewer"
+              style={{ 
+                opacity: isGameActive ? 1 : 0.5,
+                pointerEvents: isGameActive ? 'auto' : 'none'
+              }}
+            ></spline-viewer>
+          )}
         </div>
 
         {/* Game Overlay */}
@@ -359,23 +320,6 @@ const SplineGame = ({ onExit }) => {
               <Gamepad2 size={48} className="overlay-icon" />
               <h3>Ready to Explore?</h3>
               <p>Jelajahi dunia 3D dengan kontrol WASD dan mouse</p>
-              
-              <div className="preview-controls">
-                <div className="preview-item">
-                  <Keyboard size={16} />
-                  <span>WASD to move</span>
-                </div>
-                <div className="preview-item">
-                  <MousePointer2 size={16} />
-                  <span>Mouse to look</span>
-                </div>
-                {isMobile && (
-                  <div className="preview-item">
-                    <Smartphone size={16} />
-                    <span>Touch controls</span>
-                  </div>
-                )}
-              </div>
               
               <button 
                 className="start-game-btn"
@@ -397,146 +341,9 @@ const SplineGame = ({ onExit }) => {
             </div>
           </div>
         )}
-
-        {/* Mobile Controls */}
-        {isMobile && isGameActive && (
-          <div className="mobile-controls-panel">
-            {/* Movement Pad */}
-            <div className="control-pad movement-pad">
-              <div className="pad-label">
-                <Move size={16} />
-                <span>Move</span>
-              </div>
-              <div className="movement-grid">
-                <div className="movement-row">
-                  <button 
-                    className="movement-btn w-btn"
-                    onTouchStart={() => handleMobileControl('move', 'forward')}
-                    onTouchEnd={() => handleMobileControl('move', 'stop')}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleMobileControl('move', 'forward');
-                    }}
-                    onMouseUp={() => handleMobileControl('move', 'stop')}
-                    onMouseLeave={() => handleMobileControl('move', 'stop')}
-                  >
-                    <ChevronUp size={24} />
-                    <span className="key-label">W</span>
-                  </button>
-                </div>
-                <div className="movement-row">
-                  <button 
-                    className="movement-btn a-btn"
-                    onTouchStart={() => handleMobileControl('move', 'left')}
-                    onTouchEnd={() => handleMobileControl('move', 'stop')}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleMobileControl('move', 'left');
-                    }}
-                    onMouseUp={() => handleMobileControl('move', 'stop')}
-                    onMouseLeave={() => handleMobileControl('move', 'stop')}
-                  >
-                    <ChevronLeft size={24} />
-                    <span className="key-label">A</span>
-                  </button>
-                  <button 
-                    className="movement-btn s-btn"
-                    onTouchStart={() => handleMobileControl('move', 'backward')}
-                    onTouchEnd={() => handleMobileControl('move', 'stop')}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleMobileControl('move', 'backward');
-                    }}
-                    onMouseUp={() => handleMobileControl('move', 'stop')}
-                    onMouseLeave={() => handleMobileControl('move', 'stop')}
-                  >
-                    <ChevronDown size={24} />
-                    <span className="key-label">S</span>
-                  </button>
-                  <button 
-                    className="movement-btn d-btn"
-                    onTouchStart={() => handleMobileControl('move', 'right')}
-                    onTouchEnd={() => handleMobileControl('move', 'stop')}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleMobileControl('move', 'right');
-                    }}
-                    onMouseUp={() => handleMobileControl('move', 'stop')}
-                    onMouseLeave={() => handleMobileControl('move', 'stop')}
-                  >
-                    <ChevronRight size={24} />
-                    <span className="key-label">D</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Camera Pad */}
-            <div className="control-pad camera-pad">
-              <div className="pad-label">
-                <Camera size={16} />
-                <span>Camera</span>
-              </div>
-              <div className="camera-grid">
-                <button 
-                  className="camera-btn cam-up"
-                  onTouchStart={() => handleMobileControl('camera', 'up')}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleMobileControl('camera', 'up');
-                  }}
-                >
-                  <ChevronUp size={20} />
-                </button>
-                <div className="camera-row">
-                  <button 
-                    className="camera-btn cam-left"
-                    onTouchStart={() => handleMobileControl('camera', 'left')}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleMobileControl('camera', 'left');
-                    }}
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <button 
-                    className="camera-btn cam-center"
-                    onTouchStart={() => handleMobileControl('camera', 'center')}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleMobileControl('camera', 'center');
-                    }}
-                  >
-                    <Circle size={16} />
-                  </button>
-                  <button 
-                    className="camera-btn cam-right"
-                    onTouchStart={() => handleMobileControl('camera', 'right')}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleMobileControl('camera', 'right');
-                    }}
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-                <button 
-                  className="camera-btn cam-down"
-                  onTouchStart={() => handleMobileControl('camera', 'down')}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleMobileControl('camera', 'down');
-                  }}
-                >
-                  <ChevronDown size={20} />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Controls Info Panel */}
+      {/* Controls Panel */}
       {showControls && isGameActive && (
         <div className={`controls-panel ${isMobile ? 'mobile' : ''}`}>
           <h4 className="panel-title">
@@ -545,81 +352,22 @@ const SplineGame = ({ onExit }) => {
           </h4>
           
           <div className="controls-grid">
-            {/* Keyboard Controls */}
             <div className="control-section">
-              <h5 className="section-title">
-                <Keyboard size={16} />
-                <span>Keyboard</span>
-              </h5>
+              <h5 className="section-title">Keyboard</h5>
               <div className="key-bindings">
-                <div className="key-row">
-                  <div className="key-group">
-                    <kbd className="key">W</kbd>
-                    <span className="key-desc">Move Forward</span>
-                  </div>
-                  <div className="key-group">
-                    <kbd className="key">S</kbd>
-                    <span className="key-desc">Move Backward</span>
-                  </div>
-                </div>
-                <div className="key-row">
-                  <div className="key-group">
-                    <kbd className="key">A</kbd>
-                    <span className="key-desc">Move Left</span>
-                  </div>
-                  <div className="key-group">
-                    <kbd className="key">D</kbd>
-                    <span className="key-desc">Move Right</span>
-                  </div>
-                </div>
+                <div className="key-group">WASD - Move</div>
+                <div className="key-group">ESC - Exit</div>
               </div>
             </div>
 
-            {/* Mouse Controls */}
             <div className="control-section">
-              <h5 className="section-title">
-                <MousePointer2 size={16} />
-                <span>Mouse</span>
-              </h5>
+              <h5 className="section-title">Mouse</h5>
               <div className="mouse-controls">
-                <div className="mouse-row">
-                  <span className="mouse-action">Drag</span>
-                  <span className="mouse-desc">Rotate Camera</span>
-                </div>
-                <div className="mouse-row">
-                  <span className="mouse-action">Scroll</span>
-                  <span className="mouse-desc">Zoom In/Out</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Arrow Keys */}
-            <div className="control-section">
-              <h5 className="section-title">
-                <Move size={16} />
-                <span>Arrow Keys</span>
-              </h5>
-              <div className="arrow-keys">
-                <div className="arrow-row">
-                  <kbd className="arrow-key">↑</kbd>
-                </div>
-                <div className="arrow-row">
-                  <kbd className="arrow-key">←</kbd>
-                  <kbd className="arrow-key">↓</kbd>
-                  <kbd className="arrow-key">→</kbd>
-                </div>
-                <span className="arrow-desc">Alternate movement</span>
+                <div>Drag - Rotate Camera</div>
+                <div>Scroll - Zoom</div>
               </div>
             </div>
           </div>
-
-          {/* Mobile Note */}
-          {isMobile && (
-            <div className="mobile-note">
-              <Smartphone size={14} />
-              <span>Touch controls available on screen</span>
-            </div>
-          )}
         </div>
       )}
     </div>
