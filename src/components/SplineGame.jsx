@@ -174,7 +174,7 @@ const SplineGame = ({ onExit }) => {
       <button 
         className="exit-game-btn"
         onClick={handleExit}
-        title="Keluar Game (ESC)"
+        title="Back To Home (ESC)"
       >
         <ArrowLeft size={20} />
         <span className="exit-text">Kembali</span>
@@ -496,3 +496,4 @@ const SplineGame = ({ onExit }) => {
 };
 
 export default SplineGame;
+
