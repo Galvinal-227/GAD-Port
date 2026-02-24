@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
 import Header from './components/Header';
 import 'boxicons/css/boxicons.min.css';
@@ -11,6 +11,7 @@ import SplineGame from './components/SplineGame';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
@@ -20,6 +21,12 @@ function App() {
         loadingElement.remove();
       }
     }, 1000);
+  };
+
+  // Fungsi untuk handle exit dari game
+  const handleGameExit = () => {
+    console.log('Game exited, navigating to home...');
+    navigate('/'); // Navigasi kembali ke home
   };
 
   return (
@@ -52,9 +59,12 @@ function App() {
                 </>
               } 
             />
-            <Route path="/game" element={<SplineGame />} />
+            {/* Kirim onExit prop ke SplineGame */}
+            <Route 
+              path="/game" 
+              element={<SplineGame onExit={handleGameExit} />} 
+            />
           </Routes>
-
         </div>
       )}
     </>
