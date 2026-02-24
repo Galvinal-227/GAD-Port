@@ -249,25 +249,6 @@ const Header = () => {
             <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></div>
           </Link>
         ))}
-        
-        {/* Game Link - Desktop */}
-        <Link
-          to="/game"
-          className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 text-sm ${
-            isGamePage 
-              ? 'bg-[#e99b63] text-black font-semibold' 
-              : 'bg-white/10 text-white hover:bg-[#e99b63] hover:text-black border border-white/20'
-          }`}
-        >
-          <Gamepad2 size={16} />
-          <span>Play Game</span>
-          {!isGamePage && (
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e99b63] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e99b63]"></span>
-            </span>
-          )}
-        </Link>
       </nav>
 
       {/* Mobile Menu Button */}
@@ -333,27 +314,6 @@ const Header = () => {
               {item.name}
             </Link>
           ))}
-          
-          {/* Game Link - Mobile */}
-          <Link
-            to="/game"
-            className={`flex items-center gap-3 py-4 px-6 border-b border-gray-800 transition-colors ${
-              isGamePage 
-                ? 'bg-[#e99b63] text-black font-semibold' 
-                : 'text-white hover:bg-gray-900'
-            }`}
-            onClick={closeMobileMenu}
-            ref={addToMobileNavRefs}
-            style={{ opacity: 0, transform: 'translateX(50px)' }}
-          >
-            <Gamepad2 size={20} />
-            <span>🎮 Play Mini Game</span>
-            {!isGamePage && (
-              <span className="ml-auto text-xs bg-[#e99b63] text-black px-2 py-1 rounded-full">
-                NEW
-              </span>
-            )}
-          </Link>
         </nav>
       </div>
     </header>
