@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import './SplineGame.css';
 
-const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
+const SplineGame = ({ onExit }) => {
   const [isGameActive, setIsGameActive] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -75,25 +75,41 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
       }
       
       // Escape untuk keluar game
-      if (key === 'escape' && isGameActive) {
+      if (key === 'escape') {
+        console.log('ESC pressed, exiting game...');
+        e.preventDefault();
         handleExit();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isGameActive]);
+  }, [isGameActive, onExit]); // Tambahkan onExit sebagai dependency
 
   // Handle fullscreen
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      gameAreaRef.current.requestFullscreen();
-      setIsFullscreen(true);
+      if (gameAreaRef.current.requestFullscreen) {
+        gameAreaRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      }
     } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
     }
   };
+
+  // Listen for fullscreen change
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   // Start game
   const startGame = () => {
@@ -101,13 +117,34 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
     setShowControls(true);
   };
 
-  // Exit game
+  // Exit game - PERBAIKAN UTAMA
   const handleExit = () => {
+    console.log('handleExit called');
+    
+    // 1. Nonaktifkan game terlebih dahulu
+    setIsGameActive(false);
+    
+    // 2. Keluar dari fullscreen jika sedang fullscreen
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+        .then(() => {
+          setIsFullscreen(false);
+        })
+        .catch(err => {
+          console.error('Error exiting fullscreen:', err);
+        });
+    }
+    
+    // 3. Reset show controls
+    setShowControls(true);
+    
+    // 4. Panggil onExit jika ada (untuk kembali ke home)
     if (onExit) {
-      onExit();
-    } else {
-      // Fallback jika tidak ada onExit
-      setIsGameActive(false);
+      console.log('Calling onExit to return to home...');
+      // Gunakan setTimeout untuk memastikan state updates selesai
+      setTimeout(() => {
+        onExit();
+      }, 50);
     }
   };
 
@@ -119,11 +156,20 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
   // Handle mobile control clicks
   const handleMobileControl = (action, value) => {
     console.log(`Mobile control: ${action} - ${value}`);
-    // Di sini nanti bisa diintegrasikan dengan Spline events
+    
+    // Integrasi dengan Spline events jika diperlukan
+    if (splineViewerRef.current && splineViewerRef.current.querySelector('spline-viewer')) {
+      const spline = splineViewerRef.current.querySelector('spline-viewer');
+      
+      // Contoh: kirim event ke Spline
+      // spline.dispatchEvent(new CustomEvent('mobile-control', { 
+      //   detail: { action, value } 
+      // }));
+    }
   };
 
   return (
-    <div className="spline-game-wrapper">
+    <div className="spline-game-wrapper" ref={gameContainerRef}>
       {/* Exit Button - Always Visible */}
       <button 
         className="exit-game-btn"
@@ -157,7 +203,7 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
           <button 
             className="fullscreen-btn"
             onClick={toggleFullscreen}
-            title="Fullscreen"
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           >
             <Maximize2 size={20} />
           </button>
@@ -167,12 +213,13 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
       {/* Game Area */}
       <div className="game-area" ref={gameAreaRef}>
         {/* Spline Viewer */}
-        <spline-viewer 
-          ref={splineViewerRef}
-          url="https://prod.spline.design/vGKXmWGYvDFjZ7z8/scene.splinecode"
-          loading-animation
-          className="spline-viewer"
-        ></spline-viewer>
+        <div ref={splineViewerRef}>
+          <spline-viewer 
+            url="https://prod.spline.design/vGKXmWGYvDFjZ7z8/scene.splinecode"
+            loading-animation
+            className="spline-viewer"
+          ></spline-viewer>
+        </div>
 
         {/* Game Overlay */}
         {!isGameActive && (
@@ -235,6 +282,12 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
                     className="movement-btn w-btn"
                     onTouchStart={() => handleMobileControl('move', 'forward')}
                     onTouchEnd={() => handleMobileControl('move', 'stop')}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleMobileControl('move', 'forward');
+                    }}
+                    onMouseUp={() => handleMobileControl('move', 'stop')}
+                    onMouseLeave={() => handleMobileControl('move', 'stop')}
                   >
                     <ChevronUp size={24} />
                     <span className="key-label">W</span>
@@ -245,6 +298,12 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
                     className="movement-btn a-btn"
                     onTouchStart={() => handleMobileControl('move', 'left')}
                     onTouchEnd={() => handleMobileControl('move', 'stop')}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleMobileControl('move', 'left');
+                    }}
+                    onMouseUp={() => handleMobileControl('move', 'stop')}
+                    onMouseLeave={() => handleMobileControl('move', 'stop')}
                   >
                     <ChevronLeft size={24} />
                     <span className="key-label">A</span>
@@ -253,6 +312,12 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
                     className="movement-btn s-btn"
                     onTouchStart={() => handleMobileControl('move', 'backward')}
                     onTouchEnd={() => handleMobileControl('move', 'stop')}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleMobileControl('move', 'backward');
+                    }}
+                    onMouseUp={() => handleMobileControl('move', 'stop')}
+                    onMouseLeave={() => handleMobileControl('move', 'stop')}
                   >
                     <ChevronDown size={24} />
                     <span className="key-label">S</span>
@@ -261,6 +326,12 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
                     className="movement-btn d-btn"
                     onTouchStart={() => handleMobileControl('move', 'right')}
                     onTouchEnd={() => handleMobileControl('move', 'stop')}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleMobileControl('move', 'right');
+                    }}
+                    onMouseUp={() => handleMobileControl('move', 'stop')}
+                    onMouseLeave={() => handleMobileControl('move', 'stop')}
                   >
                     <ChevronRight size={24} />
                     <span className="key-label">D</span>
@@ -279,6 +350,10 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
                 <button 
                   className="camera-btn cam-up"
                   onTouchStart={() => handleMobileControl('camera', 'up')}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleMobileControl('camera', 'up');
+                  }}
                 >
                   <ChevronUp size={20} />
                 </button>
@@ -286,18 +361,30 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
                   <button 
                     className="camera-btn cam-left"
                     onTouchStart={() => handleMobileControl('camera', 'left')}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleMobileControl('camera', 'left');
+                    }}
                   >
                     <ChevronLeft size={20} />
                   </button>
                   <button 
                     className="camera-btn cam-center"
                     onTouchStart={() => handleMobileControl('camera', 'center')}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleMobileControl('camera', 'center');
+                    }}
                   >
                     <Circle size={16} />
                   </button>
                   <button 
                     className="camera-btn cam-right"
                     onTouchStart={() => handleMobileControl('camera', 'right')}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleMobileControl('camera', 'right');
+                    }}
                   >
                     <ChevronRight size={20} />
                   </button>
@@ -305,6 +392,10 @@ const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
                 <button 
                   className="camera-btn cam-down"
                   onTouchStart={() => handleMobileControl('camera', 'down')}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleMobileControl('camera', 'down');
+                  }}
                 >
                   <ChevronDown size={20} />
                 </button>
