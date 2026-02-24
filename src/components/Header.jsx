@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom'; // Import useLocation
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Gamepad2 } from 'lucide-react'; // Import icon game
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -13,6 +15,7 @@ const Header = () => {
   const navItemsRef = useRef([]);
   const mobileMenuRef = useRef(null);
   const mobileNavItemsRef = useRef([]);
+  const location = useLocation(); // Hook untuk mengetahui route aktif
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -151,55 +154,6 @@ const Header = () => {
       }
     );
 
-    // ScrollTrigger animations for sections
-    const sections = ['home', 'about', 'contact'].map(id => document.getElementById(id));
-    
-    sections.forEach((section, index) => {
-      if (section) {
-        ScrollTrigger.create({
-          trigger: section,
-          start: 'top center',
-          end: 'bottom center',
-          onEnter: () => {
-            // Highlight nav item when section enters viewport
-            gsap.to(navItemsRef.current[index], {
-              color: '#ffffff',
-              scale: 1.1,
-              duration: 0.3,
-              ease: 'power2.out'
-            });
-          },
-          onLeave: () => {
-            // Reset nav item when section leaves viewport
-            gsap.to(navItemsRef.current[index], {
-              color: '#ffffff',
-              scale: 1,
-              duration: 0.3,
-              ease: 'power2.out'
-            });
-          },
-          onEnterBack: () => {
-            // Highlight nav item when section enters viewport from bottom
-            gsap.to(navItemsRef.current[index], {
-              color: '#ffffff',
-              scale: 1.1,
-              duration: 0.3,
-              ease: 'power2.out'
-            });
-          },
-          onLeaveBack: () => {
-            // Reset nav item when section leaves viewport from top
-            gsap.to(navItemsRef.current[index], {
-              color: '#ffffff',
-              scale: 1,
-              duration: 0.3,
-              ease: 'power2.out'
-            });
-          }
-        });
-      }
-    });
-
     // Cleanup ScrollTrigger
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -254,42 +208,66 @@ const Header = () => {
     }
   };
 
+  // Cek apakah di halaman game
+  const isGamePage = location.pathname === '/game';
+
   return (
     <header 
       ref={headerRef}
       className="flex justify-between items-center py-6 px-4 lg:px-20 fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800 transition-all duration-300"
       style={{ opacity: 0 }}
     >
-      {/* Logo */}
-      <h1 
+      {/* Logo - Link ke home */}
+      <Link 
+        to="/"
         ref={logoRef}
-        className="text-2xl md:text-3xl font-light text-white cursor-pointer transition-all duration-300"
+        className="text-2xl md:text-3xl font-light text-white cursor-pointer transition-all duration-300 hover:text-gray-300"
         style={{ opacity: 0 }}
-        onClick={() => handleNavClick({ preventDefault: () => {} }, 'home')}
       >
         ALDEV
-      </h1>
+      </Link>
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex items-center gap-8">
         {[
-          { name: 'Home', id: 'home' },
-          { name: 'About Me', id: 'about' },
-          { name: 'Contact', id: 'contact' }
+          { name: 'Home', id: 'home', path: '/' },
+          { name: 'About Me', id: 'about', path: '/' },
+          { name: 'Contact', id: 'contact', path: '/' }
         ].map((item, index) => (
-          <a
+          <Link
             key={item.id}
             ref={addToNavRefs}
-            className="text-white hover:text-gray-300 transition-all duration-300 text-sm relative group cursor-pointer"
-            href={`#${item.id}`}
+            className={`text-white hover:text-gray-300 transition-all duration-300 text-sm relative group cursor-pointer ${
+              !isGamePage && location.hash === `#${item.id}` ? 'text-gray-300' : ''
+            }`}
+            to={item.path}
             onClick={(e) => handleNavClick(e, item.id)}
             style={{ opacity: 0 }}
           >
             {item.name}
             {/* Hover underline effect */}
             <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></div>
-          </a>
+          </Link>
         ))}
+        
+        {/* Game Link - Desktop */}
+        <Link
+          to="/game"
+          className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 text-sm ${
+            isGamePage 
+              ? 'bg-[#e99b63] text-black font-semibold' 
+              : 'bg-white/10 text-white hover:bg-[#e99b63] hover:text-black border border-white/20'
+          }`}
+        >
+          <Gamepad2 size={16} />
+          <span>Play Game</span>
+          {!isGamePage && (
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e99b63] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e99b63]"></span>
+            </span>
+          )}
+        </Link>
       </nav>
 
       {/* Mobile Menu Button */}
@@ -311,7 +289,13 @@ const Header = () => {
       >
         {/* Header Mobile Menu */}
         <div className="flex justify-between items-center p-6 border-b border-gray-800 bg-black">
-          <h1 className="text-2xl text-white">ALDEV</h1>
+          <Link 
+            to="/" 
+            className="text-2xl text-white hover:text-gray-300"
+            onClick={closeMobileMenu}
+          >
+            ALDEV
+          </Link>
           <button 
             className="text-white text-2xl"
             onClick={closeMobileMenu}
@@ -323,21 +307,53 @@ const Header = () => {
         {/* Navigation Items */}
         <nav className="flex flex-col gap-0 p-0 bg-black">
           {[
-            { name: 'Home', id: 'home' },
-            { name: 'About Me', id: 'about' },
-            { name: 'Contact', id: 'contact' }
+            { name: 'Home', id: 'home', path: '/' },
+            { name: 'About Me', id: 'about', path: '/' },
+            { name: 'Contact', id: 'contact', path: '/' }
           ].map((item, index) => (
-            <a
+            <Link
               key={item.id}
               ref={addToMobileNavRefs}
               className="text-white text-lg hover:bg-gray-900 transition-colors py-4 px-6 border-b border-gray-800 cursor-pointer bg-black"
-              href={`#${item.id}`}
-              onClick={(e) => handleNavClick(e, item.id)}
+              to={item.path}
+              onClick={(e) => {
+                if (item.path === '/') {
+                  e.preventDefault();
+                  closeMobileMenu();
+                  const element = document.getElementById(item.id);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                } else {
+                  closeMobileMenu();
+                }
+              }}
               style={{ opacity: 0, transform: 'translateX(50px)' }}
             >
               {item.name}
-            </a>
+            </Link>
           ))}
+          
+          {/* Game Link - Mobile */}
+          <Link
+            to="/game"
+            className={`flex items-center gap-3 py-4 px-6 border-b border-gray-800 transition-colors ${
+              isGamePage 
+                ? 'bg-[#e99b63] text-black font-semibold' 
+                : 'text-white hover:bg-gray-900'
+            }`}
+            onClick={closeMobileMenu}
+            ref={addToMobileNavRefs}
+            style={{ opacity: 0, transform: 'translateX(50px)' }}
+          >
+            <Gamepad2 size={20} />
+            <span>🎮 Play Mini Game</span>
+            {!isGamePage && (
+              <span className="ml-auto text-xs bg-[#e99b63] text-black px-2 py-1 rounded-full">
+                NEW
+              </span>
+            )}
+          </Link>
         </nav>
       </div>
     </header>
