@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+
 import Header from './components/Header';
 import 'boxicons/css/boxicons.min.css';
 import Hero from './components/Hero';
 import About from './components/About';
 import Contact from './components/Contact';
 import Loading from './components/Loading';
-import SplineGame from './components/SplineGame';
+
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
-  };
-
-  // Simple exit - langsung navigate tanpa refresh
-  const handleGameExit = () => {
-    console.log('Exiting to home...');
-    navigate('/');
+    setTimeout(() => {
+      const loadingElement = document.getElementById('loading');
+      if (loadingElement) {
+        loadingElement.remove();
+      }
+    }, 1000);
   };
 
   return (
@@ -52,11 +52,8 @@ function App() {
                 </>
               } 
             />
-            <Route 
-              path="/game" 
-              element={<SplineGame onExit={handleGameExit} />} 
-            />
           </Routes>
+
         </div>
       )}
     </>
