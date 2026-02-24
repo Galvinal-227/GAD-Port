@@ -15,7 +15,6 @@ import {
   Keyboard,
   Smartphone,
   Maximize2,
-  X,
   ArrowLeft
 } from 'lucide-react';
 import './SplineGame.css';
@@ -28,6 +27,7 @@ const SplineGame = ({ onExit }) => {
   const gameContainerRef = useRef(null);
   const splineViewerRef = useRef(null);
   const gameAreaRef = useRef(null);
+  const scriptRef = useRef(null);
 
   // Deteksi device mobile
   useEffect(() => {
@@ -41,50 +41,136 @@ const SplineGame = ({ onExit }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load Spline viewer script
+  // Load Spline viewer script dengan cleanup yang lebih baik
   useEffect(() => {
+    // Hapus script lama jika ada
+    const oldScript = document.querySelector('script[src*="spline-viewer"]');
+    if (oldScript) {
+      document.head.removeChild(oldScript);
+    }
+
+    // Buat script baru
     const script = document.createElement('script');
     script.type = 'module';
     script.src = 'https://unpkg.com/@splinetool/viewer@1.12.60/build/spline-viewer.js';
+    scriptRef.current = script;
     document.head.appendChild(script);
 
+    // Cleanup function yang komprehensif
     return () => {
-      document.head.removeChild(script);
+      console.log('Cleaning up SplineGame...');
+      
+      // 1. Hapus script
+      if (scriptRef.current && document.head.contains(scriptRef.current)) {
+        document.head.removeChild(scriptRef.current);
+      }
+
+      // 2. Hapus semua instance spline-viewer
+      const splineViewers = document.querySelectorAll('spline-viewer');
+      splineViewers.forEach(viewer => {
+        if (viewer && viewer.parentNode) {
+          // Hentikan semua animasi dan audio di dalam viewer
+          if (viewer.shadowRoot) {
+            const videos = viewer.shadowRoot.querySelectorAll('video');
+            videos.forEach(video => {
+              video.pause();
+              video.src = '';
+              video.load();
+            });
+            
+            const audios = viewer.shadowRoot.querySelectorAll('audio');
+            audios.forEach(audio => {
+              audio.pause();
+              audio.src = '';
+              audio.load();
+            });
+          }
+          
+          viewer.remove(); // Hapus dari DOM
+        }
+      });
+
+      // 3. Hapus semua canvas yang mungkin dibuat oleh Spline
+      const canvases = document.querySelectorAll('canvas');
+      canvases.forEach(canvas => {
+        if (canvas && canvas.parentNode && 
+            !canvas.closest('.spline-game-wrapper')) {
+          // Hanya hapus canvas yang bukan bagian dari komponen lain
+          const context = canvas.getContext('webgl') || canvas.getContext('2d');
+          if (context) {
+            // Bersihkan context
+            const gl = context;
+            if (gl && gl.getExtension) {
+              const loseContext = gl.getExtension('WEBGL_lose_context');
+              if (loseContext) loseContext.loseContext();
+            }
+          }
+          canvas.remove();
+        }
+      });
+
+      // 4. Hentikan semua audio di document
+      const audioElements = document.querySelectorAll('audio');
+      audioElements.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = '';
+        audio.load();
+      });
+
+      // 5. Hentikan semua video
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        video.pause();
+        video.currentTime = 0;
+        video.src = '';
+        video.load();
+      });
+
+      // 6. Bersihkan event listeners
+      window.removeEventListener('keydown', handleKeyDown);
+      
+      console.log('SplineGame cleanup complete');
     };
-  }, []);
+  }, []); // Empty dependency array
 
   // Handle keyboard controls
-  useEffect(() => {
+  const handleKeyDown = (e) => {
     if (!isGameActive) return;
+    
+    const key = e.key.toLowerCase();
+    
+    // WASD controls untuk movement
+    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key) || 
+        key.includes('arrow')) {
+      e.preventDefault();
+      
+      // Visual feedback
+      if (gameContainerRef.current) {
+        gameContainerRef.current.classList.add(`key-${key}`);
+        setTimeout(() => {
+          gameContainerRef.current.classList.remove(`key-${key}`);
+        }, 100);
+      }
+    }
+    
+    // Escape untuk keluar game
+    if (key === 'escape') {
+      console.log('ESC pressed, exiting game...');
+      e.preventDefault();
+      handleExit();
+    }
+  };
 
-    const handleKeyDown = (e) => {
-      const key = e.key.toLowerCase();
-      
-      // WASD controls untuk movement
-      if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key) || 
-          key.includes('arrow')) {
-        e.preventDefault();
-        
-        // Visual feedback
-        if (gameContainerRef.current) {
-          gameContainerRef.current.classList.add(`key-${key}`);
-          setTimeout(() => {
-            gameContainerRef.current.classList.remove(`key-${key}`);
-          }, 100);
-        }
-      }
-      
-      // Escape untuk keluar game
-      if (key === 'escape') {
-        console.log('ESC pressed, exiting game...');
-        e.preventDefault();
-        handleExit();
-      }
+  useEffect(() => {
+    if (isGameActive) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
     };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isGameActive, onExit]); // Tambahkan onExit sebagai dependency
+  }, [isGameActive]);
 
   // Handle fullscreen
   const toggleFullscreen = () => {
@@ -117,14 +203,14 @@ const SplineGame = ({ onExit }) => {
     setShowControls(true);
   };
 
-  // Exit game - PERBAIKAN UTAMA
+  // Exit game dengan force refresh
   const handleExit = () => {
     console.log('handleExit called');
     
-    // 1. Nonaktifkan game terlebih dahulu
+    // 1. Nonaktifkan game
     setIsGameActive(false);
     
-    // 2. Keluar dari fullscreen jika sedang fullscreen
+    // 2. Keluar dari fullscreen
     if (document.fullscreenElement) {
       document.exitFullscreen()
         .then(() => {
@@ -135,16 +221,59 @@ const SplineGame = ({ onExit }) => {
         });
     }
     
-    // 3. Reset show controls
+    // 3. Hentikan semua suara dengan paksa
+    const stopAllAudio = () => {
+      // Hentikan audio di document
+      const audioElements = document.querySelectorAll('audio');
+      audioElements.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = '';
+        audio.load();
+      });
+
+      // Hentikan video
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        video.pause();
+        video.currentTime = 0;
+        video.src = '';
+        video.load();
+      });
+
+      // Hentikan audio di shadow DOM spline-viewer
+      const splineViewers = document.querySelectorAll('spline-viewer');
+      splineViewers.forEach(viewer => {
+        if (viewer.shadowRoot) {
+          const audios = viewer.shadowRoot.querySelectorAll('audio');
+          audios.forEach(audio => {
+            audio.pause();
+            audio.src = '';
+            audio.load();
+          });
+        }
+      });
+    };
+
+    stopAllAudio();
+    
+    // 4. Reset show controls
     setShowControls(true);
     
-    // 4. Panggil onExit jika ada (untuk kembali ke home)
+    // 5. Force refresh dengan mengganti URL (opsional)
+    // Ini akan memaksa React untuk me-render ulang komponen
+    window.location.hash = '#game-exit';
+    
+    // 6. Panggil onExit untuk kembali ke home
     if (onExit) {
       console.log('Calling onExit to return to home...');
-      // Gunakan setTimeout untuk memastikan state updates selesai
+      // Beri sedikit delay untuk memastikan cleanup selesai
       setTimeout(() => {
         onExit();
-      }, 50);
+        
+        // 7. Force refresh halaman home (opsional - uncomment jika masih ada suara)
+        // window.location.reload();
+      }, 100);
     }
   };
 
@@ -157,24 +286,26 @@ const SplineGame = ({ onExit }) => {
   const handleMobileControl = (action, value) => {
     console.log(`Mobile control: ${action} - ${value}`);
     
-    // Integrasi dengan Spline events jika diperlukan
-    if (splineViewerRef.current && splineViewerRef.current.querySelector('spline-viewer')) {
+    // Integrasi dengan Spline events
+    if (splineViewerRef.current) {
       const spline = splineViewerRef.current.querySelector('spline-viewer');
-      
-      // Contoh: kirim event ke Spline
-      // spline.dispatchEvent(new CustomEvent('mobile-control', { 
-      //   detail: { action, value } 
-      // }));
+      if (spline) {
+        // Dispatch custom event ke spline
+        const event = new CustomEvent('mobile-control', { 
+          detail: { action, value } 
+        });
+        spline.dispatchEvent(event);
+      }
     }
   };
 
   return (
     <div className="spline-game-wrapper" ref={gameContainerRef}>
-      {/* Exit Button - Always Visible */}
+      {/* Exit Button */}
       <button 
         className="exit-game-btn"
         onClick={handleExit}
-        title="Back To Home (ESC)"
+        title="Keluar Game (ESC)"
       >
         <ArrowLeft size={20} />
         <span className="exit-text">Kembali</span>
@@ -496,4 +627,3 @@ const SplineGame = ({ onExit }) => {
 };
 
 export default SplineGame;
-
