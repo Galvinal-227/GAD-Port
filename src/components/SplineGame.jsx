@@ -14,11 +14,13 @@ import {
   MousePointer2,
   Keyboard,
   Smartphone,
-  Maximize2
+  Maximize2,
+  X,
+  ArrowLeft
 } from 'lucide-react';
 import './SplineGame.css';
 
-const SplineGame = () => {
+const SplineGame = ({ onExit }) => { // Tambahkan prop onExit
   const [isGameActive, setIsGameActive] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -71,6 +73,11 @@ const SplineGame = () => {
           }, 100);
         }
       }
+      
+      // Escape untuk keluar game
+      if (key === 'escape' && isGameActive) {
+        handleExit();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -94,6 +101,16 @@ const SplineGame = () => {
     setShowControls(true);
   };
 
+  // Exit game
+  const handleExit = () => {
+    if (onExit) {
+      onExit();
+    } else {
+      // Fallback jika tidak ada onExit
+      setIsGameActive(false);
+    }
+  };
+
   // Toggle controls info
   const toggleControls = () => {
     setShowControls(!showControls);
@@ -107,6 +124,17 @@ const SplineGame = () => {
 
   return (
     <div className="spline-game-wrapper">
+      {/* Exit Button - Always Visible */}
+      <button 
+        className="exit-game-btn"
+        onClick={handleExit}
+        title="Keluar Game (ESC)"
+      >
+        <ArrowLeft size={20} />
+        <span className="exit-text">Kembali</span>
+        <span className="exit-shortcut">ESC</span>
+      </button>
+
       {/* Game Header */}
       <div className="game-header">
         <div className="header-left">
