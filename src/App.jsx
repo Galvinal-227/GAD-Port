@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 import Header from './components/Header';
 import 'boxicons/css/boxicons.min.css';
@@ -12,6 +12,7 @@ import SplineGame from './components/SplineGame';
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
@@ -23,27 +24,48 @@ function App() {
     }, 1000);
   };
 
-  // Fungsi untuk handle exit dari game - LANGSUNG REFRESH
+  // Fungsi untuk handle exit dari game - TANPA REFRESH
   const handleGameExit = () => {
-    console.log('Game exited, refreshing page...');
+    console.log('Game exited, returning to home...');
     
-    // Hentikan semua suara yang mungkin masih jalan
-    const audioElements = document.querySelectorAll('audio');
-    audioElements.forEach(audio => {
-      audio.pause();
-      audio.src = '';
-      audio.load();
-    });
+    // Matikan semua audio
+    const stopAllAudio = () => {
+      // Audio elements
+      const audioElements = document.querySelectorAll('audio');
+      audioElements.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = '';
+        audio.load();
+      });
 
-    const videoElements = document.querySelectorAll('video');
-    videoElements.forEach(video => {
-      video.pause();
-      video.src = '';
-      video.load();
-    });
+      // Video elements
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        video.pause();
+        video.currentTime = 0;
+        video.src = '';
+        video.load();
+      });
 
-    // Force refresh halaman
-    window.location.reload();
+      // Coba matikan audio di shadow DOM
+      const splineViewers = document.querySelectorAll('spline-viewer');
+      splineViewers.forEach(viewer => {
+        if (viewer.shadowRoot) {
+          const audios = viewer.shadowRoot.querySelectorAll('audio');
+          audios.forEach(audio => {
+            audio.pause();
+            audio.src = '';
+            audio.load();
+          });
+        }
+      });
+    };
+
+    stopAllAudio();
+    
+    // Navigasi ke home tanpa refresh
+    navigate('/');
   };
 
   return (
@@ -65,7 +87,7 @@ function App() {
           <div className="h-0 w-[40rem] absolute top-[20%] right-[-5%] shadow-[0_0_900px_20px_#e99b63] -rotate-[30deg] -z-10"></div> 
           
           <Header />
-          <Routes>
+          <Routes location={location} key={location.pathname}>
             <Route 
               path="/" 
               element={
