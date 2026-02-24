@@ -482,4 +482,112 @@
     width: 40px;
     height: 40px;
   }
+
+}
+/* Exit Button */
+.exit-game-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.exit-game-btn:hover {
+  background: rgba(255, 59, 59, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 59, 59, 0.3);
+}
+
+.exit-game-btn:active {
+  transform: translateY(0);
+}
+
+.exit-text {
+  margin-right: 4px;
+}
+
+.exit-shortcut {
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+  .exit-game-btn {
+    top: 16px;
+    left: 16px;
+    padding: 8px 12px;
+  }
+  
+  .exit-text {
+    display: none; /* Sembunyikan teks di mobile, hanya tampilkan icon */
+  }
+  
+  .exit-shortcut {
+    display: none; /* Sembunyikan shortcut di mobile */
+  }
+}
+
+/* Saat fullscreen */
+:-webkit-full-screen .exit-game-btn,
+:-moz-full-screen .exit-game-btn,
+:fullscreen .exit-game-btn {
+  top: 30px;
+  left: 30px;
+}
+
+/* Game header adjustment dengan exit button */
+.spline-game-wrapper {
+  position: relative;
+  padding-top: 0; /* Hapus padding top karena exit button fixed */
+}
+
+.game-header {
+  margin-left: 60px; /* Beri ruang untuk exit button */
+}
+
+@media (max-width: 768px) {
+  .game-header {
+    margin-left: 50px;
+  }
+}
+
+/* Hover effect untuk semua button */
+.control-toggle-btn:hover,
+.fullscreen-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Animasi untuk exit button */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.exit-game-btn {
+  animation: slideIn 0.3s ease-out;
 }
