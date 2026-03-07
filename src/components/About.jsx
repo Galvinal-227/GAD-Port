@@ -513,11 +513,11 @@ const About = () => {
             ref={imageContainerRef}
             className="relative cursor-pointer"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-yellow-600 rounded-full blur-xl opacity-30"></div>
+            <div className="absolute inset-0 rounded-full blur-xl opacity-30"></div>
             
             <div 
               ref={imageRef}
-              className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-transparent bg-gradient-to-r from-orange-500 to-yellow-500 p-1 transform-style-3d"
+              className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-transparent p-1 transform-style-3d"
             >
               <div className="w-full h-full rounded-full overflow-hidden bg-[#0a0a0a]">
                 <img 
