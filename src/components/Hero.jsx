@@ -71,7 +71,7 @@ const Hero = () => {
         
         <div className="overflow-hidden">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-wider my-8 animate-slideInLeft">
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
               GALVIN ALFITO D.
             </span>
           </h1>
@@ -80,7 +80,7 @@ const Hero = () => {
         <div className="h-20 md:h-24">
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-wider mb-4">
             <span className="text-white">{typedText}</span>
-            <span className="animate-pulse text-3xl">|</span>
+            <span className="animate-pulse text-3xl text-orange-500">|</span>
           </h2>
         </div>
 
@@ -90,10 +90,10 @@ const Hero = () => {
 
         {/* CTA Buttons */}
         <div className="flex gap-4 animate-fadeInUp animation-delay-200">
-          <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:scale-105 transition-transform duration-300">
+          <button className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-700 rounded-lg font-semibold hover:scale-105 transition-transform duration-300">
             View Projects
           </button>
-          <button className="px-6 py-3 border border-gray-600 rounded-lg font-semibold hover:border-purple-400 hover:text-purple-400 transition-all duration-300">
+          <button className="px-6 py-3 border border-orange-500/50 rounded-lg font-semibold hover:border-orange-500 hover:text-orange-500 transition-all duration-300">
             Contact Me
           </button>
         </div>
@@ -121,7 +121,7 @@ const Hero = () => {
       <div className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <button 
           onClick={scrollToAbout}
-          className="flex flex-col items-center text-gray-400 hover:text-white transition-colors duration-300 group"
+          className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors duration-300 group"
         >
           <span className="text-sm tracking-wider mb-2">Scroll Down</span>
           <div className="animate-bounce group-hover:animate-none">
@@ -136,7 +136,7 @@ const Hero = () => {
           <a
             key={social}
             href={`#${social}`}
-            className="text-gray-400 hover:text-white transition-colors duration-300 hover:scale-110 transform"
+            className="text-gray-400 hover:text-orange-500 transition-colors duration-300 hover:scale-110 transform"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <i className={`bx bxl-${social} text-xl animate-slideInLeft`}></i>
