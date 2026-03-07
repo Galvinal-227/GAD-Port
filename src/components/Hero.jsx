@@ -71,7 +71,7 @@ const Hero = () => {
         
         <div className="overflow-hidden">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-wider my-8 animate-slideInLeft">
-            <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+            <span className="bg-gradient bg-clip-text text-transparent">
               GALVIN ALFITO D.
             </span>
           </h1>
@@ -87,17 +87,6 @@ const Hero = () => {
         <p className="text-base sm:text-lg tracking-wider text-gray-400 max-w-[25rem] lg:max-w-[30rem] mb-6 animate-fadeInUp">
           Passionate web developer with expertise in modern web technologies. I create responsive, user-friendly websites and applications that deliver exceptional user experiences.
         </p>
-
-        {/* CTA Buttons */}
-        <div className="flex gap-4 animate-fadeInUp animation-delay-200">
-          <button className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-700 rounded-lg font-semibold hover:scale-105 transition-transform duration-300">
-            View Projects
-          </button>
-          <button className="px-6 py-3 border border-orange-500/50 rounded-lg font-semibold hover:border-orange-500 hover:text-orange-500 transition-all duration-300">
-            Contact Me
-          </button>
-        </div>
-
       </div>
 
       <Spline  
@@ -149,3 +138,4 @@ const Hero = () => {
 }
 
 export default Hero;
+
