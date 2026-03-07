@@ -69,53 +69,63 @@ const Hero = () => {
 
       <div className="ml-[5%] mt-24 relative">
         
-        {/* Abstract Background Shapes */}
-        <div className="absolute -top-20 -left-20 w-64 h-64 bg-orange-400/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
-        <div className="absolute top-40 -left-10 w-72 h-72 bg-orange-300/10 rounded-full blur-3xl -z-10 animate-pulse animation-delay-1000"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl -z-10"></div>
-        
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 -z-10 opacity-20" 
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #f97316 1px, transparent 1px),
-              linear-gradient(to bottom, #f97316 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px'
-          }}>
+        {/* Liquid Ripple Background */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          {/* Ripple 1 */}
+          <div className="absolute top-20 -left-20 w-96 h-96 rounded-full bg-orange-400/5 animate-ripple"></div>
+          
+          {/* Ripple 2 */}
+          <div className="absolute top-40 -left-10 w-80 h-80 rounded-full bg-orange-500/5 animate-ripple animation-delay-1000"></div>
+          
+          {/* Ripple 3 */}
+          <div className="absolute bottom-0 right-20 w-64 h-64 rounded-full bg-orange-300/5 animate-ripple animation-delay-2000"></div>
+          
+          {/* Ripple 4 */}
+          <div className="absolute top-60 left-40 w-72 h-72 rounded-full bg-orange-400/5 animate-ripple animation-delay-3000"></div>
+          
+          {/* Ripple 5 */}
+          <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-orange-600/5 animate-ripple animation-delay-1500"></div>
         </div>
 
-        {/* Floating Dots */}
-        <div className="absolute top-10 right-10 -z-10">
-          <div className="relative">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1 h-1 bg-orange-400/30 rounded-full"
-                style={{
-                  top: `${i * 15}px`,
-                  left: `${i * 15}px`,
-                  animation: `floatDot ${3 + i}s infinite`
-                }}
-              ></div>
-            ))}
-          </div>
+        {/* Liquid Wave Effect */}
+        <div className="absolute inset-0 -z-10 opacity-30">
+          <svg className="absolute top-0 left-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="wave" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <path d="M0 50 Q 25 30, 50 50 T 100 50" stroke="#f97316" fill="none" strokeWidth="0.5" opacity="0.3">
+                  <animate attributeName="d" 
+                    values="M0 50 Q 25 30, 50 50 T 100 50; 
+                            M0 50 Q 25 70, 50 50 T 100 50; 
+                            M0 50 Q 25 30, 50 50 T 100 50" 
+                    dur="8s" repeatCount="indefinite"/>
+                </path>
+                <path d="M0 60 Q 25 40, 50 60 T 100 60" stroke="#f97316" strokeWidth="0.5" opacity="0.2">
+                  <animate attributeName="d" 
+                    values="M0 60 Q 25 40, 50 60 T 100 60; 
+                            M0 60 Q 25 80, 50 60 T 100 60; 
+                            M0 60 Q 25 40, 50 60 T 100 60" 
+                    dur="7s" repeatCount="indefinite"/>
+                </path>
+              </pattern>
+            </defs>
+            <rect x="0" y="0" width="100%" height="100%" fill="url(#wave)"/>
+          </svg>
         </div>
 
-        {/* Diagonal Lines */}
-        <svg className="absolute top-0 right-0 -z-10 w-64 h-64 opacity-20" viewBox="0 0 100 100">
-          <line x1="0" y1="100" x2="100" y2="0" stroke="#f97316" strokeWidth="0.5" />
-          <line x1="20" y1="100" x2="100" y2="20" stroke="#f97316" strokeWidth="0.5" />
-          <line x1="40" y1="100" x2="100" y2="40" stroke="#f97316" strokeWidth="0.5" />
-        </svg>
+        {/* Floating Blobs */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-10 left-20 w-32 h-32 bg-orange-400/10 rounded-full filter blur-xl animate-floatBlob"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-orange-500/10 rounded-full filter blur-xl animate-floatBlob animation-delay-2000"></div>
+          <div className="absolute top-40 right-40 w-24 h-24 bg-orange-300/10 rounded-full filter blur-xl animate-floatBlob animation-delay-4000"></div>
+        </div>
 
         <div className="overflow-hidden">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-wider my-8 animate-slideInLeft relative">
-            <span className="bg-clip-text text-white relative z-10">
+            <span className="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 bg-clip-text text-transparent relative z-10">
               GALVIN ALFITO D.
             </span>
             {/* Text Shadow Effect */}
-            <span className="absolute top-1 left-1 -z-10 blur-lg opacity-30  bg-clip-text text-white">
+            <span className="absolute top-1 left-1 -z-10 blur-lg opacity-30 bg-gradient-to-r from-orange-300 to-orange-500 bg-clip-text text-transparent">
               GALVIN ALFITO D.
             </span>
           </h1>
@@ -124,7 +134,7 @@ const Hero = () => {
         <div className="h-20 md:h-24">
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-wider mb-4">
             <span className="text-white">{typedText}</span>
-            <span className="animate-pulse text-3xl text-orange-400">|</span>
+            <span className="animate-pulse text-3xl text-orange-300">|</span>
           </h2>
         </div>
 
@@ -132,8 +142,19 @@ const Hero = () => {
           Passionate web developer with expertise in modern web technologies. I create responsive, user-friendly websites and applications that deliver exceptional user experiences.
           
           {/* Accent Line */}
-          <span className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-orange-400 to-orange-600 rounded-full opacity-50"></span>
+          <span className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-orange-300 to-orange-500 rounded-full opacity-50"></span>
         </p>
+
+        {/* CTA Buttons */}
+        <div className="flex gap-4 animate-fadeInUp animation-delay-200">
+          <button className="px-6 py-3 bg-gradient-to-r from-orange-300 to-orange-500 rounded-lg font-semibold hover:scale-105 transition-transform duration-300 shadow-lg shadow-orange-500/20">
+            View Projects
+          </button>
+          <button className="px-6 py-3 border border-orange-300/50 rounded-lg font-semibold hover:border-orange-300 hover:text-orange-300 transition-all duration-300">
+            Contact Me
+          </button>
+        </div>
+
       </div>
 
       <Spline  
@@ -157,7 +178,7 @@ const Hero = () => {
       <div className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <button 
           onClick={scrollToAbout}
-          className="flex flex-col items-center text-gray-400 hover:text-orange-400 transition-colors duration-300 group"
+          className="flex flex-col items-center text-gray-400 hover:text-orange-300 transition-colors duration-300 group"
         >
           <span className="text-sm tracking-wider mb-2">Scroll Down</span>
           <div className="animate-bounce group-hover:animate-none">
@@ -172,7 +193,7 @@ const Hero = () => {
           <a
             key={social}
             href={`#${social}`}
-            className="text-gray-400 hover:text-orange-400 transition-colors duration-300 hover:scale-110 transform"
+            className="text-gray-400 hover:text-orange-300 transition-colors duration-300 hover:scale-110 transform"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <i className={`bx bxl-${social} text-xl animate-slideInLeft`}></i>
