@@ -54,25 +54,6 @@ const About = () => {
     { name: "Netlify / Vercel", icon: "bx bx-cloud-upload", color: "text-yellow-400" },
   ];
 
-  // Floating shapes data
-  const shapes = [
-    { 
-      id: 1, 
-      img: "https://images.unsplash.com/photo-1494790108777-296ef5a4ecf8?w=200&h=200&fit=crop",
-      style: { top: '10%', left: '5%', width: '100px', height: '100px' }
-    },
-    { 
-      id: 2, 
-      img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
-      style: { bottom: '15%', right: '8%', width: '130px', height: '130px' }
-    },
-    { 
-      id: 3, 
-      img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop",
-      style: { top: '20%', right: '15%', width: '80px', height: '80px' }
-    },
-  ];
-
   const addToSkillsRefs = (el) => {
     if (el && !skillsRef.current.includes(el)) {
       skillsRef.current.push(el);
