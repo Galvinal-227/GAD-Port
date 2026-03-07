@@ -12,7 +12,6 @@ const About = () => {
   const skillsRef = useRef([]);
   const toolsRef = useRef([]);
   const statsRef = useRef([]);
-  const shapesRef = useRef([]);
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isCvLoading, setIsCvLoading] = useState(false);
@@ -69,12 +68,6 @@ const About = () => {
   const addToStatsRefs = (el) => {
     if (el && !statsRef.current.includes(el)) {
       statsRef.current.push(el);
-    }
-  };
-
-  const addToShapesRefs = (el) => {
-    if (el && !shapesRef.current.includes(el)) {
-      shapesRef.current.push(el);
     }
   };
 
@@ -159,36 +152,6 @@ const About = () => {
           }
         }
       );
-
-      // Floating shapes animation
-      shapesRef.current.forEach((shape, index) => {
-        gsap.fromTo(shape,
-          { scale: 0, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 1,
-            delay: index * 0.2,
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-              trigger: shape,
-              start: "top 90%",
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
-
-        // Floating animation
-        gsap.to(shape, {
-          y: index % 2 === 0 ? -20 : 20,
-          x: index % 2 === 0 ? 15 : -15,
-          rotation: index % 2 === 0 ? 5 : -5,
-          duration: 3 + index,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut"
-        });
-      });
 
       // Skills animation
       skillsRef.current.forEach((skill, index) => {
@@ -280,27 +243,6 @@ const About = () => {
 
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden min-h-screen">
-      {/* Floating Shapes */}
-      <div className="floating-shapes absolute inset-0 pointer-events-none z-10">
-        {shapes.map((shape, index) => (
-          <div
-            key={shape.id}
-            ref={addToShapesRefs}
-            className="shape absolute rounded-full overflow-hidden shadow-xl border-4 border-white/20 cursor-pointer pointer-events-auto transition-all duration-300 hover:scale-110 hover:rotate-6 hover:z-20"
-            style={{
-              ...shape.style,
-              filter: 'grayscale(30%)',
-            }}
-          >
-            <img 
-              src={shape.img} 
-              alt={`Shape ${shape.id}`}
-              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-            />
-          </div>
-        ))}
-      </div>
-
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
@@ -430,12 +372,12 @@ const About = () => {
             </div>
           </div>
 
-          {/* Profile Image with Morphing Effect */}
+          {/* Profile Image with Morphing Effect - SATU FOTO SAJA */}
           <div 
             ref={imageContainerRef}
             className="relative cursor-pointer group"
           >
-            {/* Profile Frame dengan efek morphing */}
+            {/* Profile Frame dengan efek morphing - SATU FRAME SAJA */}
             <div 
               ref={imageRef}
               className="profile-frame w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] relative overflow-hidden shadow-2xl"
@@ -447,7 +389,7 @@ const About = () => {
               />
             </div>
 
-            {/* Decorative elements */}
+            {/* Decorative elements - Tetap ada untuk mempercantik */}
             <div className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
@@ -516,24 +458,6 @@ const About = () => {
 
         .profile-frame:hover {
           animation-duration: 3s;
-        }
-
-        .shape {
-          transition: all 0.3s ease;
-        }
-
-        .shape:hover {
-          transform: scale(1.15) rotate(5deg);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-          z-index: 30;
-        }
-
-        .floating-shapes {
-          pointer-events: none;
-        }
-
-        .shape {
-          pointer-events: auto;
         }
       `}</style>
     </section>
