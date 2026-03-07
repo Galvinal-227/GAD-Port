@@ -16,6 +16,7 @@ const About = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isCvLoading, setIsCvLoading] = useState(false);
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
+  const [morphProgress, setMorphProgress] = useState(0);
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   
@@ -53,6 +54,39 @@ const About = () => {
     { name: "Netlify / Vercel", icon: "bx bx-cloud-upload", color: "text-yellow-400" },
   ];
 
+  // Fungsi untuk mendapatkan border-radius morphing berdasarkan progress
+  const getMorphRadius = (progress) => {
+    // Animasi morphing antara beberapa bentuk
+    const morphs = [
+      "30% 70% 70% 30% / 30% 30% 70% 70%",     // Bentuk 1
+      "58% 42% 75% 25% / 76% 46% 54% 24%",     // Bentuk 2
+      "50% 50% 33% 67% / 55% 27% 73% 45%",     // Bentuk 3
+      "33% 67% 58% 42% / 63% 68% 32% 37%",     // Bentuk 4
+      "30% 70% 70% 30% / 30% 30% 70% 70%",     // Kembali ke bentuk 1
+    ];
+    
+    // Hitung index morph berdasarkan progress
+    const segmentLength = 1 / (morphs.length - 1);
+    const segmentIndex = Math.floor(progress / segmentLength);
+    const segmentProgress = (progress - segmentIndex * segmentLength) / segmentLength;
+    
+    if (segmentIndex >= morphs.length - 1) return morphs[morphs.length - 1];
+    
+    // Parse border-radius values
+    const startValues = morphs[segmentIndex].split(' / ').map(part => part.split(' ').map(v => parseFloat(v)));
+    const endValues = morphs[segmentIndex + 1].split(' / ').map(part => part.split(' ').map(v => parseFloat(v)));
+    
+    // Interpolasi values
+    const interpolated = startValues.map((part, i) => 
+      part.map((val, j) => {
+        const diff = endValues[i][j] - val;
+        return val + diff * segmentProgress;
+      }).join('% ')
+    ).join(' / ');
+    
+    return interpolated;
+  };
+
   const handleMouseMove = (e) => {
     if (!imageContainerRef.current) return;
     
@@ -61,6 +95,9 @@ const About = () => {
     const y = ((e.clientY - top) / height - 0.5) * 2;
     
     setMousePosition({ x, y });
+    
+    // Percepat morphing saat mouse bergerak
+    setMorphProgress(prev => (prev + 0.02) % 1);
   };
 
   const addToSkillsRefs = (el) => {
@@ -82,6 +119,11 @@ const About = () => {
   };
 
   useEffect(() => {
+    // Animasi morphing otomatis
+    const morphInterval = setInterval(() => {
+      setMorphProgress(prev => (prev + 0.005) % 1);
+    }, 50);
+
     if (imageContainerRef.current) {
       imageContainerRef.current.addEventListener('mousemove', handleMouseMove);
       imageContainerRef.current.addEventListener('mouseleave', handleMouseLeave);
@@ -108,18 +150,14 @@ const About = () => {
 
       gsap.fromTo(imageRef.current,
         {
-          rotationY: -30,
-          rotationX: 15,
           scale: 0.8,
           opacity: 0,
-          z: -100
+          rotate: -10
         },
         {
-          rotationY: 0,
-          rotationX: 0,
           scale: 1,
           opacity: 1,
-          z: 0,
+          rotate: 0,
           duration: 1.8,
           ease: "power3.out",
           scrollTrigger: {
@@ -316,6 +354,7 @@ const About = () => {
     }, sectionRef);
 
     return () => {
+      clearInterval(morphInterval);
       ctx.revert();
       if (imageContainerRef.current) {
         imageContainerRef.current.removeEventListener('mousemove', handleMouseMove);
@@ -329,6 +368,7 @@ const About = () => {
 
     const { x, y } = mousePosition;
     
+    // Efek 3D rotation saat mouse bergerak
     gsap.to(imageRef.current, {
       rotationY: x * 15,
       rotationX: -y * 10,
@@ -517,20 +557,38 @@ const About = () => {
             
             <div 
               ref={imageRef}
-              className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-transparent p-1 transform-style-3d"
+              className="relative w-80 h-80 overflow-hidden border-4 border-transparent p-1 transform-style-3d"
+              style={{
+                borderRadius: getMorphRadius(morphProgress),
+                transition: 'border-radius 0.1s ease',
+                boxShadow: mousePosition.x !== 0 || mousePosition.y !== 0 
+                  ? '0 25px 50px -12px rgba(249, 115, 22, 0.5)' 
+                  : '0 20px 40px -12px rgba(0, 0, 0, 0.5)',
+              }}
             >
-              <div className="w-full h-full rounded-full overflow-hidden bg-[#0a0a0a]">
+              <div className="w-full h-full overflow-hidden bg-gradient-to-br from-orange-500/20 to-yellow-500/20">
                 <img 
                   src="/profile.png" 
                   alt="Profile" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                  style={{
+                    filter: mousePosition.x !== 0 || mousePosition.y !== 0 ? 'grayscale(0%)' : 'grayscale(20%)',
+                  }}
                 />
               </div>
               
-              <div className="absolute inset-0 rounded-full border-2 border-white/10 pointer-events-none"></div>
+              {/* Overlay effect untuk menambah efek gelombang */}
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at ${50 + mousePosition.x * 20}% ${50 + mousePosition.y * 20}%, rgba(249, 115, 22, 0.2), transparent 70%)`,
+                  borderRadius: 'inherit',
+                }}
+              ></div>
             </div>
 
-            <div className="floating-element absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            {/* Floating elements dengan warna orange/yellow */}
+            <div className="floating-element absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
 
@@ -549,14 +607,14 @@ const About = () => {
             <div className="absolute bottom-8 right-8 bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
               <div className="flex items-center gap-2">
                 <i className="bx bx-award"></i>
-                <span>2+ Years Exp</span>
+                <span>3+ Years Exp</span>
               </div>
             </div>
 
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
               <p className="text-gray-400 text-sm flex items-center gap-2">
                 <i className="bx bx-mouse text-yellow-400"></i>
-                Hover for 3D effect
+                Hover for 3D & Wave effect
               </p>
             </div>
           </div>
@@ -565,7 +623,7 @@ const About = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-gray-800">
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
-            { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
+            { number: "3+", label: "Years Experience", icon: "bx bx-calendar" },
             { number: "5+", label: "Happy Clients", icon: "bx bx-user" },
             { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" }
           ].map((stat, index) => (
