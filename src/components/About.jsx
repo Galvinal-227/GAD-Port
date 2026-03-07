@@ -12,11 +12,11 @@ const About = () => {
   const skillsRef = useRef([]);
   const toolsRef = useRef([]);
   const statsRef = useRef([]);
+  const shapesRef = useRef([]);
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isCvLoading, setIsCvLoading] = useState(false);
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
-  const [morphProgress, setMorphProgress] = useState(0);
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   
@@ -24,17 +24,17 @@ const About = () => {
 
   const handleCvClick = () => {
     setIsCvLoading(true);
-    
     setTimeout(() => {
       setIsCvLoading(false);
+      window.open(cvDriveUrl, '_blank');
     }, 3000);
   };
 
   const handleProjectsClick = () => {
     setIsProjectsLoading(true);
-    
     setTimeout(() => {
       setIsProjectsLoading(false);
+      window.open(projectsUrl, '_blank');
     }, 3000);
   };
 
@@ -54,51 +54,24 @@ const About = () => {
     { name: "Netlify / Vercel", icon: "bx bx-cloud-upload", color: "text-yellow-400" },
   ];
 
-  // Fungsi untuk mendapatkan border-radius morphing berdasarkan progress
-  const getMorphRadius = (progress) => {
-    // Animasi morphing antara beberapa bentuk
-    const morphs = [
-      "30% 70% 70% 30% / 30% 30% 70% 70%",     // Bentuk 1
-      "58% 42% 75% 25% / 76% 46% 54% 24%",     // Bentuk 2
-      "50% 50% 33% 67% / 55% 27% 73% 45%",     // Bentuk 3
-      "33% 67% 58% 42% / 63% 68% 32% 37%",     // Bentuk 4
-      "30% 70% 70% 30% / 30% 30% 70% 70%",     // Kembali ke bentuk 1
-    ];
-    
-    // Hitung index morph berdasarkan progress
-    const segmentLength = 1 / (morphs.length - 1);
-    const segmentIndex = Math.floor(progress / segmentLength);
-    const segmentProgress = (progress - segmentIndex * segmentLength) / segmentLength;
-    
-    if (segmentIndex >= morphs.length - 1) return morphs[morphs.length - 1];
-    
-    // Parse border-radius values
-    const startValues = morphs[segmentIndex].split(' / ').map(part => part.split(' ').map(v => parseFloat(v)));
-    const endValues = morphs[segmentIndex + 1].split(' / ').map(part => part.split(' ').map(v => parseFloat(v)));
-    
-    // Interpolasi values
-    const interpolated = startValues.map((part, i) => 
-      part.map((val, j) => {
-        const diff = endValues[i][j] - val;
-        return val + diff * segmentProgress;
-      }).join('% ')
-    ).join(' / ');
-    
-    return interpolated;
-  };
-
-  const handleMouseMove = (e) => {
-    if (!imageContainerRef.current) return;
-    
-    const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - left) / width - 0.5) * 2;
-    const y = ((e.clientY - top) / height - 0.5) * 2;
-    
-    setMousePosition({ x, y });
-    
-    // Percepat morphing saat mouse bergerak
-    setMorphProgress(prev => (prev + 0.02) % 1);
-  };
+  // Floating shapes data
+  const shapes = [
+    { 
+      id: 1, 
+      img: "https://images.unsplash.com/photo-1494790108777-296ef5a4ecf8?w=200&h=200&fit=crop",
+      style: { top: '10%', left: '5%', width: '100px', height: '100px' }
+    },
+    { 
+      id: 2, 
+      img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
+      style: { bottom: '15%', right: '8%', width: '130px', height: '130px' }
+    },
+    { 
+      id: 3, 
+      img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop",
+      style: { top: '20%', right: '15%', width: '80px', height: '80px' }
+    },
+  ];
 
   const addToSkillsRefs = (el) => {
     if (el && !skillsRef.current.includes(el)) {
@@ -118,23 +91,45 @@ const About = () => {
     }
   };
 
-  useEffect(() => {
-    // Animasi morphing otomatis
-    const morphInterval = setInterval(() => {
-      setMorphProgress(prev => (prev + 0.005) % 1);
-    }, 50);
+  const addToShapesRefs = (el) => {
+    if (el && !shapesRef.current.includes(el)) {
+      shapesRef.current.push(el);
+    }
+  };
 
+  const handleMouseMove = (e) => {
+    if (!imageContainerRef.current) return;
+    
+    const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - left) / width - 0.5) * 2;
+    const y = ((e.clientY - top) / height - 0.5) * 2;
+    
+    setMousePosition({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePosition({ x: 0, y: 0 });
+    
+    gsap.to(imageRef.current, {
+      rotationY: 0,
+      rotationX: 0,
+      x: 0,
+      y: 0,
+      duration: 1,
+      ease: "elastic.out(1, 0.5)"
+    });
+  };
+
+  useEffect(() => {
     if (imageContainerRef.current) {
       imageContainerRef.current.addEventListener('mousemove', handleMouseMove);
       imageContainerRef.current.addEventListener('mouseleave', handleMouseLeave);
     }
 
     const ctx = gsap.context(() => {
+      // Section fade in
       gsap.fromTo(sectionRef.current,
-        { 
-          opacity: 0,
-          y: 100
-        },
+        { opacity: 0, y: 100 },
         {
           opacity: 1,
           y: 0,
@@ -148,16 +143,15 @@ const About = () => {
         }
       );
 
+      // Profile image animation
       gsap.fromTo(imageRef.current,
         {
           scale: 0.8,
           opacity: 0,
-          rotate: -10
         },
         {
           scale: 1,
           opacity: 1,
-          rotate: 0,
           duration: 1.8,
           ease: "power3.out",
           scrollTrigger: {
@@ -168,11 +162,9 @@ const About = () => {
         }
       );
 
+      // Text animation
       gsap.fromTo(textRef.current,
-        {
-          x: -100,
-          opacity: 0
-        },
+        { x: -100, opacity: 0 },
         {
           x: 0,
           opacity: 1,
@@ -187,18 +179,41 @@ const About = () => {
         }
       );
 
+      // Floating shapes animation
+      shapesRef.current.forEach((shape, index) => {
+        gsap.fromTo(shape,
+          { scale: 0, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 1,
+            delay: index * 0.2,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: shape,
+              start: "top 90%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+
+        // Floating animation
+        gsap.to(shape, {
+          y: index % 2 === 0 ? -20 : 20,
+          x: index % 2 === 0 ? 15 : -15,
+          rotation: index % 2 === 0 ? 5 : -5,
+          duration: 3 + index,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut"
+        });
+      });
+
+      // Skills animation
       skillsRef.current.forEach((skill, index) => {
         gsap.fromTo(skill,
+          { y: 50, opacity: 0, scale: 0.8 },
           {
-            rotationY: 45,
-            rotationX: 10,
-            y: 50,
-            opacity: 0,
-            scale: 0.8
-          },
-          {
-            rotationY: 0,
-            rotationX: 0,
             y: 0,
             opacity: 1,
             scale: 1,
@@ -212,40 +227,13 @@ const About = () => {
             }
           }
         );
-
-        skill.addEventListener('mouseenter', () => {
-          gsap.to(skill, {
-            rotationY: 5,
-            rotationX: 2,
-            y: -5,
-            scale: 1.02,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
-
-        skill.addEventListener('mouseleave', () => {
-          gsap.to(skill, {
-            rotationY: 0,
-            rotationX: 0,
-            y: 0,
-            scale: 1,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
       });
 
+      // Tools animation
       toolsRef.current.forEach((tool, index) => {
         gsap.fromTo(tool,
+          { y: 30, opacity: 0, scale: 0 },
           {
-            rotationY: -30,
-            y: 30,
-            opacity: 0,
-            scale: 0
-          },
-          {
-            rotationY: 0,
             y: 0,
             opacity: 1,
             scale: 1,
@@ -259,40 +247,13 @@ const About = () => {
             }
           }
         );
-
-        tool.addEventListener('mouseenter', () => {
-          gsap.to(tool, {
-            rotationY: 10,
-            y: -8,
-            scale: 1.1,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
-
-        tool.addEventListener('mouseleave', () => {
-          gsap.to(tool, {
-            rotationY: 0,
-            y: 0,
-            scale: 1,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
       });
 
+      // Stats animation
       statsRef.current.forEach((stat, index) => {
         gsap.fromTo(stat,
+          { y: 50, opacity: 0, scale: 0.5 },
           {
-            rotationY: 20,
-            rotationX: 10,
-            y: 50,
-            opacity: 0,
-            scale: 0.5
-          },
-          {
-            rotationY: 0,
-            rotationX: 0,
             y: 0,
             opacity: 1,
             scale: 1,
@@ -306,55 +267,11 @@ const About = () => {
             }
           }
         );
-
-        stat.addEventListener('mouseenter', () => {
-          gsap.to(stat, {
-            rotationY: 15,
-            y: -10,
-            duration: 0.4,
-            ease: "power2.out"
-          });
-        });
-
-        stat.addEventListener('mouseleave', () => {
-          gsap.to(stat, {
-            rotationY: 0,
-            y: 0,
-            duration: 0.4,
-            ease: "power2.out"
-          });
-        });
-      });
-
-      const floatingElements = sectionRef.current.querySelectorAll('.floating-element');
-      floatingElements.forEach((element, index) => {
-        gsap.to(element, {
-          y: index % 2 === 0 ? -20 : 20,
-          rotation: index % 2 === 0 ? 5 : -5,
-          duration: 3,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: index * 0.5
-        });
-      });
-
-      const bgElements = sectionRef.current.querySelectorAll('.bg-element');
-      bgElements.forEach((element, index) => {
-        gsap.to(element, {
-          y: index % 2 === 0 ? 50 : -50,
-          x: index % 2 === 0 ? -30 : 30,
-          duration: 20,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut"
-        });
       });
 
     }, sectionRef);
 
     return () => {
-      clearInterval(morphInterval);
       ctx.revert();
       if (imageContainerRef.current) {
         imageContainerRef.current.removeEventListener('mousemove', handleMouseMove);
@@ -370,60 +287,47 @@ const About = () => {
     
     // Efek 3D rotation saat mouse bergerak
     gsap.to(imageRef.current, {
-      rotationY: x * 15,
-      rotationX: -y * 10,
-      x: x * 10,
-      y: y * 10,
+      rotationY: x * 10,
+      rotationX: -y * 8,
+      x: x * 8,
+      y: y * 8,
       duration: 0.8,
       ease: "power2.out"
     });
 
-    const floatingElements = document.querySelectorAll('.floating-element');
-    floatingElements.forEach((element, index) => {
-      gsap.to(element, {
-        x: x * (20 + index * 5),
-        y: y * (20 + index * 5),
-        rotation: x * (5 + index * 2),
-        duration: 1,
-        ease: "power2.out"
-      });
-    });
-
   }, [mousePosition]);
 
-  const handleMouseLeave = () => {
-    setMousePosition({ x: 0, y: 0 });
-    
-    gsap.to(imageRef.current, {
-      rotationY: 0,
-      rotationX: 0,
-      x: 0,
-      y: 0,
-      duration: 1,
-      ease: "elastic.out(1, 0.5)"
-    });
-
-    const floatingElements = document.querySelectorAll('.floating-element');
-    floatingElements.forEach((element) => {
-      gsap.to(element, {
-        x: 0,
-        y: 0,
-        rotation: 0,
-        duration: 1,
-        ease: "elastic.out(1, 0.5)"
-      });
-    });
-  };
-
   return (
-    <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="bg-element absolute -top-40 -right-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20"></div>
-        <div className="bg-element absolute -bottom-40 -left-40 w-80 h-80 bg-amber-800 rounded-full blur-3xl opacity-20"></div>
+    <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden min-h-screen">
+      {/* Floating Shapes */}
+      <div className="floating-shapes absolute inset-0 pointer-events-none z-10">
+        {shapes.map((shape, index) => (
+          <div
+            key={shape.id}
+            ref={addToShapesRefs}
+            className="shape absolute rounded-full overflow-hidden shadow-xl border-4 border-white/20 cursor-pointer pointer-events-auto transition-all duration-300 hover:scale-110 hover:rotate-6 hover:z-20"
+            style={{
+              ...shape.style,
+              filter: 'grayscale(30%)',
+            }}
+          >
+            <img 
+              src={shape.img} 
+              alt={`Shape ${shape.id}`}
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-800 rounded-full blur-3xl opacity-20 animate-pulse"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-900 rounded-full blur-3xl opacity-10"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-20">
         <div className="text-center mb-16 relative">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
             About <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">Me</span>
@@ -462,7 +366,7 @@ const About = () => {
                     <div
                       key={skill.name}
                       ref={addToSkillsRefs}
-                      className="skill-item group cursor-pointer transform-style-3d p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 hover:border-orange-500 transition-all duration-300"
+                      className="skill-item group cursor-pointer p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 hover:border-orange-500 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20"
                     >
                       <div className="flex items-center gap-3">
                         <i className={`${skill.icon} text-orange-400 text-xl`}></i>
@@ -483,7 +387,7 @@ const About = () => {
                     <div
                       key={tool.name}
                       ref={addToToolsRefs}
-                      className="tool-item flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 cursor-pointer transform-style-3d hover:border-yellow-500 transition-all duration-300"
+                      className="tool-item flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 cursor-pointer hover:border-yellow-500 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/20"
                     >
                       <i className={`${tool.icon} ${tool.color} text-xl`}></i>
                       <span className="text-gray-300 text-sm font-medium">{tool.name}</span>
@@ -496,17 +400,15 @@ const About = () => {
             <div className="flex gap-4 flex-wrap">
               <a
                 href="#contact"
-                className="bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 flex items-center gap-3"
+                className="bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 flex items-center gap-3 hover:scale-105"
               >
                 <span>Get In Touch</span>
                 <i className="bx bx-chat text-xl"></i>
               </a>
               
-              <a
-                href={projectsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
                 onClick={handleProjectsClick}
+                disabled={isProjectsLoading}
                 className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-orange-500 hover:text-white hover:bg-orange-500/10 flex items-center gap-3 group ${
                   isProjectsLoading ? 'pointer-events-none opacity-75' : ''
                 }`}
@@ -523,13 +425,11 @@ const About = () => {
                     <i className="bx bx-link-external text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
                   </>
                 )}
-              </a>
+              </button>
               
-              <a
-                href={cvDriveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
                 onClick={handleCvClick}
+                disabled={isCvLoading}
                 className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group ${
                   isCvLoading ? 'pointer-events-none opacity-75' : ''
                 }`}
@@ -545,66 +445,41 @@ const About = () => {
                     <i className="bx bx-download text-xl group-hover:animate-bounce"></i>
                   </>
                 )}
-              </a>
+              </button>
             </div>
           </div>
 
+          {/* Profile Image with Morphing Effect */}
           <div 
             ref={imageContainerRef}
-            className="relative cursor-pointer"
+            className="relative cursor-pointer group"
           >
-            <div className="absolute inset-0 rounded-full blur-xl opacity-30"></div>
-            
+            {/* Profile Frame dengan efek morphing */}
             <div 
               ref={imageRef}
-              className="relative w-80 h-80 overflow-hidden border-4 border-transparent p-1 transform-style-3d"
-              style={{
-                borderRadius: getMorphRadius(morphProgress),
-                transition: 'border-radius 0.1s ease',
-                boxShadow: mousePosition.x !== 0 || mousePosition.y !== 0 
-                  ? '0 25px 50px -12px rgba(249, 115, 22, 0.5)' 
-                  : '0 20px 40px -12px rgba(0, 0, 0, 0.5)',
-              }}
+              className="profile-frame w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] relative overflow-hidden shadow-2xl"
             >
-              <div className="w-full h-full overflow-hidden bg-gradient-to-br from-orange-500/20 to-yellow-500/20">
-                <img 
-                  src="/profile.png" 
-                  alt="Profile" 
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                  style={{
-                    filter: mousePosition.x !== 0 || mousePosition.y !== 0 ? 'grayscale(0%)' : 'grayscale(20%)',
-                  }}
-                />
-              </div>
-              
-              {/* Overlay effect untuk menambah efek gelombang */}
-              <div 
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle at ${50 + mousePosition.x * 20}% ${50 + mousePosition.y * 20}%, rgba(249, 115, 22, 0.2), transparent 70%)`,
-                  borderRadius: 'inherit',
-                }}
-              ></div>
+              <img 
+                src="/profile.png" 
+                alt="Profile" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
             </div>
 
-            {/* Floating elements dengan warna orange/yellow */}
-            <div className="floating-element absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            {/* Decorative elements */}
+            <div className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
 
-            <div className="floating-element absolute -bottom-6 -left-6 w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
               <i className="bx bx-heart text-white text-xl"></i>
             </div>
 
-            <div className="floating-element absolute -top-8 left-8 w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl">
+            <div className="absolute top-1/2 -right-8 w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl animate-bounce">
               <i className="bx bx-star text-white text-lg"></i>
             </div>
 
-            <div className="floating-element absolute bottom-4 -right-8 w-12 h-12 bg-gradient-to-br from-yellow-600 to-orange-600 rounded-2xl flex items-center justify-center shadow-2xl">
-              <i className="bx bx-rocket text-white text-lg"></i>
-            </div>
-
-            <div className="absolute bottom-8 right-8 bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl transform-style-3d">
+            <div className="absolute bottom-8 right-8 bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl">
               <div className="flex items-center gap-2">
                 <i className="bx bx-award"></i>
                 <span>3+ Years Exp</span>
@@ -614,12 +489,13 @@ const About = () => {
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
               <p className="text-gray-400 text-sm flex items-center gap-2">
                 <i className="bx bx-mouse text-yellow-400"></i>
-                Hover for 3D & Wave effect
+                Hover for 3D effect
               </p>
             </div>
           </div>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-gray-800">
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
@@ -630,7 +506,7 @@ const About = () => {
             <div
               key={stat.label}
               ref={addToStatsRefs}
-              className="text-center group cursor-pointer transform-style-3d"
+              className="text-center group cursor-pointer hover:transform hover:scale-110 transition-all duration-300"
             >
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-to-br group-hover:from-orange-500/30 group-hover:to-yellow-500/30 transition-all duration-300">
                 <i className={`${stat.icon} text-2xl text-yellow-400`}></i>
@@ -643,15 +519,40 @@ const About = () => {
       </div>
 
       <style jsx>{`
-        .transform-style-3d {
-          transform-style: preserve-3d;
-          perspective: 1000px;
+        @keyframes morphing {
+          0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+          25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+          50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+          75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+          100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
         }
-        
-        .floating-element,
-        .skill-item,
-        .tool-item {
-          transition: transform 0.3s ease;
+
+        .profile-frame {
+          animation: morphing 10s ease-in-out infinite;
+          background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(234,179,8,0.2));
+          box-shadow: 0 25px 50px -12px rgba(249, 115, 22, 0.3);
+        }
+
+        .profile-frame:hover {
+          animation-duration: 3s;
+        }
+
+        .shape {
+          transition: all 0.3s ease;
+        }
+
+        .shape:hover {
+          transform: scale(1.15) rotate(5deg);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          z-index: 30;
+        }
+
+        .floating-shapes {
+          pointer-events: none;
+        }
+
+        .shape {
+          pointer-events: auto;
         }
       `}</style>
     </section>
