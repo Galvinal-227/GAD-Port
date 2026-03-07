@@ -144,17 +144,6 @@ const Hero = () => {
           {/* Accent Line */}
           <span className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-orange-300 to-orange-500 rounded-full opacity-50"></span>
         </p>
-
-        {/* CTA Buttons */}
-        <div className="flex gap-4 animate-fadeInUp animation-delay-200">
-          <button className="px-6 py-3 bg-gradient-to-r from-orange-300 to-orange-500 rounded-lg font-semibold hover:scale-105 transition-transform duration-300 shadow-lg shadow-orange-500/20">
-            View Projects
-          </button>
-          <button className="px-6 py-3 border border-orange-300/50 rounded-lg font-semibold hover:border-orange-300 hover:text-orange-300 transition-all duration-300">
-            Contact Me
-          </button>
-        </div>
-
       </div>
 
       <Spline  
@@ -206,3 +195,4 @@ const Hero = () => {
 }
 
 export default Hero;
+
