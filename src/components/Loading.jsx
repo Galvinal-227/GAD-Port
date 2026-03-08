@@ -2,54 +2,18 @@ import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
-
+import helvetikerBold from '/fonts/helvetiker_bold.typeface.json'; 
 const Loading = ({ onComplete }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const percentageRef = useRef(null);
   const audioRef = useRef(null);
   const [audioReady, setAudioReady] = useState(false);
-  const [fontLoaded, setFontLoaded] = useState(false);
-
-  useEffect(() => {
-    // Inisialisasi audio
-    audioRef.current = new Audio('/backsound.mp3');
-    audioRef.current.loop = false;
-    audioRef.current.volume = 0.5;
-    audioRef.current.load();
-
-    const handleUserInteraction = () => {
-      if (audioRef.current && !audioReady) {
-        audioRef.current.play()
-          .then(() => {
-            setAudioReady(true);
-            console.log('Audio started playing');
-          })
-          .catch(error => {
-            console.log('Audio autoplay failed:', error);
-          });
-      }
-    };
-
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, []);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Scene setup
+    // Scene setup (sama seperti sebelumnya)
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     
@@ -90,11 +54,27 @@ const Loading = ({ onComplete }) => {
     light2.position.set(-4, 3, 7);
     scene.add(light2);
 
-    // Create text with chrome material - dengan fallback
-    const createFallbackGeometry = () => {
-      console.log('Using fallback geometry (TorusKnot)');
-      const geometry = new THREE.TorusKnotGeometry(1.5, 0.4, 128, 16);
-      const material = new THREE.MeshStandardMaterial({
+    // Create text with chrome material menggunakan font lokal
+    try {
+      // Font sudah di-import, langsung gunakan
+      const font = helvetikerBold;
+      
+      const textGeometry = new TextGeometry('ALDEV', {
+        font: font,
+        size: 2.5,
+        height: 0.5,
+        curveSegments: 32,
+        bevelEnabled: true,
+        bevelThickness: 0.05,
+        bevelSize: 0.05,
+        bevelOffset: 0,
+        bevelSegments: 12
+      });
+      
+      textGeometry.center();
+      textGeometry.computeVertexNormals();
+
+      const chromeMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         emissive: 0x111111,
         roughness: 0.15,
@@ -102,190 +82,131 @@ const Loading = ({ onComplete }) => {
         emissiveIntensity: 0,
         envMapIntensity: 1.5
       });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.set(0, 0.5, 0);
-      mesh.rotation.x = 0.5;
-      mesh.rotation.y = 0.5;
-      return mesh;
-    };
 
-    // Try to load font, but use fallback if fails
-    const loader = new FontLoader();
-    let textMesh = null;
-    
-    // Set timeout for font loading
-    const fontLoadTimeout = setTimeout(() => {
-      if (!fontLoaded) {
-        console.log('Font loading timeout - using fallback');
-        textMesh = createFallbackGeometry();
-        scene.add(textMesh);
-        setFontLoaded(true);
+      const textMesh = new THREE.Mesh(textGeometry, chromeMaterial);
+      textMesh.position.set(0, 0.5, 0);
+      scene.add(textMesh);
+
+      // Particle system
+      const particleGeometry = new THREE.BufferGeometry();
+      const particleCount = 200;
+      const positions = new Float32Array(particleCount * 3);
+      
+      for (let i = 0; i < particleCount; i++) {
+        positions[i*3] = (Math.random() - 0.5) * 20;
+        positions[i*3+1] = (Math.random() - 0.5) * 20;
+        positions[i*3+2] = (Math.random() - 0.5) * 20;
       }
-    }, 3000);
+      
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      
+      const particleMaterial = new THREE.PointsMaterial({
+        color: 0x88aaff,
+        size: 0.05,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending
+      });
+      
+      const particles = new THREE.Points(particleGeometry, particleMaterial);
+      scene.add(particles);
 
-    loader.load(
-      'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
-      function(font) {
-        clearTimeout(fontLoadTimeout);
-        console.log('Font loaded successfully');
+      // Animation variables
+      let startTime = Date.now();
+      const animationDuration = 4000;
+      let time = 0;
+      let audioStarted = false;
+
+      const easeInOutCubic = (x) => {
+        return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      };
+
+      function animate() {
+        requestAnimationFrame(animate);
         
-        const textGeometry = new TextGeometry('ALDEV', {
-          font: font,
-          size: 2.5,
-          height: 0.5,
-          curveSegments: 32,
-          bevelEnabled: true,
-          bevelThickness: 0.05,
-          bevelSize: 0.05,
-          bevelOffset: 0,
-          bevelSegments: 12
-        });
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / animationDuration, 1);
         
-        textGeometry.center();
-        textGeometry.computeVertexNormals();
+        if (percentageRef.current) {
+          percentageRef.current.textContent = Math.floor(progress * 100) + '%';
+        }
 
-        const chromeMaterial = new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          emissive: 0x111111,
-          roughness: 0.15,
-          metalness: 0.95,
-          emissiveIntensity: 0,
-          envMapIntensity: 1.5
-        });
-
-        textMesh = new THREE.Mesh(textGeometry, chromeMaterial);
-        textMesh.position.set(0, 0.5, 0);
-        scene.add(textMesh);
-        setFontLoaded(true);
-      },
-      undefined,
-      function(error) {
-        clearTimeout(fontLoadTimeout);
-        console.error('Font loading error:', error);
-        textMesh = createFallbackGeometry();
-        scene.add(textMesh);
-        setFontLoaded(true);
-      }
-    );
-
-    // Particle system (tetap ada meskipun font gagal)
-    const particleGeometry = new THREE.BufferGeometry();
-    const particleCount = 200;
-    const positions = new Float32Array(particleCount * 3);
-    
-    for (let i = 0; i < particleCount; i++) {
-      positions[i*3] = (Math.random() - 0.5) * 20;
-      positions[i*3+1] = (Math.random() - 0.5) * 20;
-      positions[i*3+2] = (Math.random() - 0.5) * 20;
-    }
-    
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    
-    const particleMaterial = new THREE.PointsMaterial({
-      color: 0x88aaff,
-      size: 0.05,
-      transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending
-    });
-    
-    const particles = new THREE.Points(particleGeometry, particleMaterial);
-    scene.add(particles);
-
-    // Animation variables
-    let startTime = Date.now();
-    const animationDuration = 4000;
-    let time = 0;
-    let audioStarted = false;
-
-    const easeInOutCubic = (x) => {
-      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-    };
-
-    function animate() {
-      requestAnimationFrame(animate);
-      
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / animationDuration, 1);
-      
-      if (percentageRef.current) {
-        percentageRef.current.textContent = Math.floor(progress * 100) + '%';
-      }
-
-      if (progress > 0.1 && !audioStarted && audioRef.current && audioReady) {
-        audioStarted = true;
-        audioRef.current.play().catch(e => console.log('Audio play failed:', e));
-      }
-      
-      const lightIntensity = easeInOutCubic(progress) * 2;
-      const particleOpacity = easeInOutCubic(progress) * 0.6;
-      
-      keyLight.intensity = lightIntensity;
-      fillLight.intensity = lightIntensity * 0.5;
-      backLight.intensity = lightIntensity * 0.75;
-      light1.intensity = lightIntensity * 0.5;
-      light2.intensity = lightIntensity * 0.5;
-      ambientLight.intensity = lightIntensity * 0.3;
-      
-      particleMaterial.opacity = particleOpacity;
-      
-      if (textMesh) {
-        if (textMesh.geometry.type === 'TextGeometry') {
-          textMesh.material.emissiveIntensity = progress * 0.2;
-        } else {
-          // For TorusKnot, also update emissive
+        if (progress > 0.1 && !audioStarted && audioRef.current && audioReady) {
+          audioStarted = true;
+          audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+        }
+        
+        const lightIntensity = easeInOutCubic(progress) * 2;
+        const particleOpacity = easeInOutCubic(progress) * 0.6;
+        
+        keyLight.intensity = lightIntensity;
+        fillLight.intensity = lightIntensity * 0.5;
+        backLight.intensity = lightIntensity * 0.75;
+        light1.intensity = lightIntensity * 0.5;
+        light2.intensity = lightIntensity * 0.5;
+        ambientLight.intensity = lightIntensity * 0.3;
+        
+        particleMaterial.opacity = particleOpacity;
+        
+        if (textMesh) {
           textMesh.material.emissiveIntensity = progress * 0.2;
         }
-      }
-      
-      time += 0.01;
+        
+        time += 0.01;
 
-      if (textMesh) {
-        if (textMesh.geometry.type === 'TextGeometry') {
+        if (textMesh) {
           textMesh.rotation.y += 0.005;
           textMesh.rotation.x = Math.sin(time * 0.3) * 0.1;
           textMesh.rotation.z = Math.sin(time * 0.2) * 0.05;
-        } else {
-          // Rotate fallback geometry differently
-          textMesh.rotation.y += 0.01;
-          textMesh.rotation.x += 0.005;
+        }
+
+        particles.rotation.y += 0.0005;
+        particles.rotation.x += 0.0003;
+
+        if (progress > 0.5) {
+          const pulseFactor = 1 + Math.sin(time * 3) * 0.1 * (progress - 0.5) * 2;
+          keyLight.intensity = lightIntensity * pulseFactor;
+          backLight.intensity = lightIntensity * 0.75 * pulseFactor;
+        }
+
+        camera.position.x = Math.sin(time * 0.1) * 2;
+        camera.position.y = 1 + Math.sin(time * 0.2) * 0.3;
+        camera.lookAt(0, 0.5, 0);
+        
+        renderer.render(scene, camera);
+
+        if (progress >= 1 && onComplete) {
+          if (audioRef.current) {
+            const fadeOut = setInterval(() => {
+              if (audioRef.current.volume > 0.1) {
+                audioRef.current.volume -= 0.1;
+              } else {
+                audioRef.current.pause();
+                clearInterval(fadeOut);
+              }
+            }, 100);
+          }
+
+          setTimeout(() => {
+            onComplete();
+          }, 500);
         }
       }
 
-      particles.rotation.y += 0.0005;
-      particles.rotation.x += 0.0003;
-
-      if (progress > 0.5) {
-        const pulseFactor = 1 + Math.sin(time * 3) * 0.1 * (progress - 0.5) * 2;
-        keyLight.intensity = lightIntensity * pulseFactor;
-        backLight.intensity = lightIntensity * 0.75 * pulseFactor;
-      }
-
-      camera.position.x = Math.sin(time * 0.1) * 2;
-      camera.position.y = 1 + Math.sin(time * 0.2) * 0.3;
-      camera.lookAt(0, 0.5, 0);
-      
-      renderer.render(scene, camera);
-
-      if (progress >= 1 && onComplete) {
-        if (audioRef.current) {
-          const fadeOut = setInterval(() => {
-            if (audioRef.current.volume > 0.1) {
-              audioRef.current.volume -= 0.1;
-            } else {
-              audioRef.current.pause();
-              clearInterval(fadeOut);
-            }
-          }, 100);
-        }
-
-        setTimeout(() => {
-          onComplete();
-        }, 500);
-      }
+      animate();
+    } catch (error) {
+      console.error('Error creating text geometry:', error);
+      // Fallback: buat geometry alternatif
+      const geometry = new THREE.TorusKnotGeometry(1.5, 0.4, 128, 16);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.15,
+        metalness: 0.95
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(0, 0.5, 0);
+      scene.add(mesh);
     }
-
-    animate();
 
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -298,31 +219,12 @@ const Loading = ({ onComplete }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
-      
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      clearTimeout(fontLoadTimeout);
     };
   }, [onComplete, audioReady]);
 
   return (
     <div ref={containerRef} className="fixed inset-0 z-50 bg-black">
       <canvas ref={canvasRef} className="w-full h-full" />
-      
-      <button 
-        onClick={() => {
-          if (audioRef.current && !audioReady) {
-            audioRef.current.play()
-              .then(() => setAudioReady(true))
-              .catch(e => console.log('Audio play failed:', e));
-          }
-        }}
-        className="absolute top-5 right-5 z-50 bg-white/10 hover:bg-white/20 text-white/70 hover:text-white px-4 py-2 rounded-full text-xs transition-all backdrop-blur-sm border border-white/10"
-      >
-        {audioReady ? '🔊 Audio On' : '🔈 Click to Enable Audio'}
-      </button>
       
       <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center z-50 pointer-events-none w-[300px]">
         <div className="w-full h-[2px] bg-white/10 mx-auto rounded overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.2)]">
