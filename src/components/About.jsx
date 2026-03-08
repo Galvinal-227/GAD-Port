@@ -253,7 +253,7 @@ const About = () => {
       <div className="max-w-7xl mx-auto relative z-20">
         <div className="text-center mb-16 relative">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            About <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">Me</span>
+            About <span className="bg-clip-text text-white">Me</span>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-yellow-500 mx-auto mb-6 rounded-full"></div>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mb-8">
@@ -268,7 +268,7 @@ const About = () => {
             </h3>
             
             <p className="text-gray-300 mb-8 leading-relaxed text-lg">
-              Passionate developer with <span className="text-orange-400 font-semibold">3+ years</span> of experience 
+              Passionate developer with <span className="text-orange-400 font-semibold">2+ years</span> of experience 
               creating immersive web experiences. I specialize in modern JavaScript frameworks, 
               interactive animations, and responsive design.
             </p>
@@ -405,15 +405,11 @@ const About = () => {
             <div className="absolute bottom-8 right-8 bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-2 px-4 rounded-full text-sm font-bold shadow-2xl">
               <div className="flex items-center gap-2">
                 <i className="bx bx-award"></i>
-                <span>3+ Years Exp</span>
+                <span>2+ Years Exp</span>
               </div>
             </div>
 
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
-              <p className="text-gray-400 text-sm flex items-center gap-2">
-                <i className="bx bx-mouse text-yellow-400"></i>
-                Hover for 3D effect
-              </p>
             </div>
           </div>
         </div>
