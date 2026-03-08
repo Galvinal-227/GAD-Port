@@ -418,8 +418,7 @@ const About = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-gray-800">
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
-            { number: "3+", label: "Years Experience", icon: "bx bx-calendar" },
-            { number: "5+", label: "Happy Clients", icon: "bx bx-user" },
+            { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
             { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" }
           ].map((stat, index) => (
             <div
