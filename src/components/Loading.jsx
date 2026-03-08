@@ -1,5 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 
 const Loading = ({ onComplete }) => {
   const canvasRef = useRef(null);
@@ -10,14 +12,14 @@ const Loading = ({ onComplete }) => {
 
   useEffect(() => {
     // Inisialisasi audio
-    audioRef.current = new Audio('/Backsound Loading.mp3'); 
+    audioRef.current = new Audio('/backsound.mp3'); // Ganti dengan path file audio Anda
     audioRef.current.loop = false;
-    audioRef.current.volume = 0.5; // Set volume 50%
+    audioRef.current.volume = 0.5;
 
     // Load audio
     audioRef.current.load();
 
-    // Event listener untuk user interaction (karena browser biasanya memblock autoplay)
+    // Event listener untuk user interaction
     const handleUserInteraction = () => {
       if (audioRef.current && !audioReady) {
         audioRef.current.play()
@@ -31,13 +33,11 @@ const Loading = ({ onComplete }) => {
       }
     };
 
-    // Tambahkan event listeners untuk user interaction
     document.addEventListener('click', handleUserInteraction);
     document.addEventListener('touchstart', handleUserInteraction);
     document.addEventListener('keydown', handleUserInteraction);
 
     return () => {
-      // Cleanup audio
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
@@ -68,26 +68,22 @@ const Loading = ({ onComplete }) => {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.5;
 
-    // Lighting setup - dimulai dari gelap
+    // Lighting setup
     const ambientLight = new THREE.AmbientLight(0x404060, 0);
     scene.add(ambientLight);
 
-    // Main key light
     const keyLight = new THREE.PointLight(0xffeedd, 0);
     keyLight.position.set(5, 5, 10);
     scene.add(keyLight);
 
-    // Fill light
     const fillLight = new THREE.PointLight(0x446688, 0);
     fillLight.position.set(-5, 0, 8);
     scene.add(fillLight);
 
-    // Back light for rim effect
     const backLight = new THREE.PointLight(0xffffff, 0);
     backLight.position.set(0, -2, -8);
     scene.add(backLight);
 
-    // Additional lights for chrome effect
     const light1 = new THREE.PointLight(0xffaa88, 0);
     light1.position.set(3, 4, 6);
     scene.add(light1);
@@ -97,10 +93,10 @@ const Loading = ({ onComplete }) => {
     scene.add(light2);
 
     // Create text with chrome material
-    const loader = new THREE.FontLoader();
+    const loader = new FontLoader();
     
     loader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', function(font) {
-      const textGeometry = new THREE.TextGeometry('ALDEV', {
+      const textGeometry = new TextGeometry('ALDEV', {
         font: font,
         size: 2.5,
         height: 0.5,
@@ -115,7 +111,6 @@ const Loading = ({ onComplete }) => {
       textGeometry.center();
       textGeometry.computeVertexNormals();
 
-      // Chrome material
       const chromeMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         emissive: 0x111111,
@@ -129,7 +124,7 @@ const Loading = ({ onComplete }) => {
       textMesh.position.set(0, 0.5, 0);
       scene.add(textMesh);
 
-      // Add floating particles for sparkle effect
+      // Particle system
       const particleGeometry = new THREE.BufferGeometry();
       const particleCount = 200;
       const positions = new Float32Array(particleCount * 3);
@@ -155,41 +150,32 @@ const Loading = ({ onComplete }) => {
 
       // Animation variables
       let startTime = Date.now();
-      const animationDuration = 4000; // 4 seconds
+      const animationDuration = 4000;
       let time = 0;
       let audioStarted = false;
 
-      // Easing function for smooth fade
       const easeInOutCubic = (x) => {
         return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
       };
 
-      // Animation loop
       function animate() {
         requestAnimationFrame(animate);
         
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / animationDuration, 1);
         
-        // Update percentage display
         if (percentageRef.current) {
           percentageRef.current.textContent = Math.floor(progress * 100) + '%';
         }
 
-        // Start audio when progress reaches 10% (atau bisa disesuaikan)
-        if (progress > 0.1 && !audioStarted && audioRef.current) {
+        if (progress > 0.1 && !audioStarted && audioRef.current && audioReady) {
           audioStarted = true;
-          // Coba play audio (mungkin masih perlu user interaction)
-          if (audioReady) {
-            audioRef.current.play().catch(e => console.log('Audio play failed:', e));
-          }
+          audioRef.current.play().catch(e => console.log('Audio play failed:', e));
         }
         
-        // Fade in lights based on progress
         const lightIntensity = easeInOutCubic(progress) * 2;
         const particleOpacity = easeInOutCubic(progress) * 0.6;
         
-        // Update all light intensities
         keyLight.intensity = lightIntensity;
         fillLight.intensity = lightIntensity * 0.5;
         backLight.intensity = lightIntensity * 0.75;
@@ -197,44 +183,36 @@ const Loading = ({ onComplete }) => {
         light2.intensity = lightIntensity * 0.5;
         ambientLight.intensity = lightIntensity * 0.3;
         
-        // Update particle opacity
         particleMaterial.opacity = particleOpacity;
         
-        // Update chrome emissive
         if (textMesh) {
           textMesh.material.emissiveIntensity = progress * 0.2;
         }
         
         time += 0.01;
 
-        // Rotate text slowly
         if (textMesh) {
           textMesh.rotation.y += 0.005;
           textMesh.rotation.x = Math.sin(time * 0.3) * 0.1;
           textMesh.rotation.z = Math.sin(time * 0.2) * 0.05;
         }
 
-        // Rotate particles
         particles.rotation.y += 0.0005;
         particles.rotation.x += 0.0003;
 
-        // Pulsing lights for chrome effect (after fade in)
         if (progress > 0.5) {
           const pulseFactor = 1 + Math.sin(time * 3) * 0.1 * (progress - 0.5) * 2;
           keyLight.intensity = lightIntensity * pulseFactor;
           backLight.intensity = lightIntensity * 0.75 * pulseFactor;
         }
 
-        // Camera slight movement
         camera.position.x = Math.sin(time * 0.1) * 2;
         camera.position.y = 1 + Math.sin(time * 0.2) * 0.3;
         camera.lookAt(0, 0.5, 0);
         
         renderer.render(scene, camera);
 
-        // Call onComplete when animation finishes
         if (progress >= 1 && onComplete) {
-          // Fade out audio
           if (audioRef.current) {
             const fadeOut = setInterval(() => {
               if (audioRef.current.volume > 0.1) {
@@ -255,7 +233,6 @@ const Loading = ({ onComplete }) => {
       animate();
     });
 
-    // Resize handler
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -264,12 +241,10 @@ const Loading = ({ onComplete }) => {
 
     window.addEventListener('resize', handleResize);
 
-    // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
       
-      // Cleanup audio
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
@@ -281,7 +256,6 @@ const Loading = ({ onComplete }) => {
     <div ref={containerRef} className="fixed inset-0 z-50 bg-black">
       <canvas ref={canvasRef} className="w-full h-full" />
       
-      {/* Audio Controls - Optional UI untuk user mengaktifkan audio */}
       <button 
         onClick={() => {
           if (audioRef.current && !audioReady) {
