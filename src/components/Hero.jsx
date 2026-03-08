@@ -20,33 +20,23 @@ const Hero = () => {
   const projectPhotos = [
     {
       id: 1,
-      img: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop",
+      img: "/Screenshot 2026-03-04 134038.png",
       style: { top: '10%', left: '5%', width: '120px', height: '120px', rotate: '-5deg' }
     },
     {
       id: 2,
-      img: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=300&h=300&fit=crop",
+      img: "/Screenshot 2026-03-04 143657.png",
       style: { top: '15%', right: '8%', width: '150px', height: '150px', rotate: '8deg' }
     },
     {
       id: 3,
-      img: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=300&fit=crop",
+      img: "/Screenshot 2026-03-06 050430.png",
       style: { bottom: '20%', left: '12%', width: '130px', height: '130px', rotate: '12deg' }
     },
     {
       id: 4,
-      img: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=300&h=300&fit=crop",
+      img: "/Screenshot 2026-03-06 051150.png",
       style: { bottom: '25%', right: '15%', width: '140px', height: '140px', rotate: '-8deg' }
-    },
-    {
-      id: 5,
-      img: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=300&h=300&fit=crop",
-      style: { top: '40%', left: '20%', width: '100px', height: '100px', rotate: '15deg' }
-    },
-    {
-      id: 6,
-      img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300&h=300&fit=crop",
-      style: { top: '60%', right: '20%', width: '110px', height: '110px', rotate: '-12deg' }
     }
   ];
 
@@ -272,3 +262,4 @@ const Hero = () => {
 }
 
 export default Hero;
+
