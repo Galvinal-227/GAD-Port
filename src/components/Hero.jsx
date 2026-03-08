@@ -16,6 +16,40 @@ const Hero = () => {
     'React Expert'
   ];
 
+  // Data foto untuk floating shapes
+  const projectPhotos = [
+    {
+      id: 1,
+      img: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop",
+      style: { top: '10%', left: '5%', width: '120px', height: '120px', rotate: '-5deg' }
+    },
+    {
+      id: 2,
+      img: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=300&h=300&fit=crop",
+      style: { top: '15%', right: '8%', width: '150px', height: '150px', rotate: '8deg' }
+    },
+    {
+      id: 3,
+      img: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=300&fit=crop",
+      style: { bottom: '20%', left: '12%', width: '130px', height: '130px', rotate: '12deg' }
+    },
+    {
+      id: 4,
+      img: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=300&h=300&fit=crop",
+      style: { bottom: '25%', right: '15%', width: '140px', height: '140px', rotate: '-8deg' }
+    },
+    {
+      id: 5,
+      img: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=300&h=300&fit=crop",
+      style: { top: '40%', left: '20%', width: '100px', height: '100px', rotate: '15deg' }
+    },
+    {
+      id: 6,
+      img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300&h=300&fit=crop",
+      style: { top: '60%', right: '20%', width: '110px', height: '110px', rotate: '-12deg' }
+    }
+  ];
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
@@ -69,42 +103,50 @@ const Hero = () => {
 
       <div className="ml-[5%] mt-24 relative">
         
-        {/* Liquid Ripple Background */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          {/* Ripple 1 */}
-          <div className="absolute top-20 -left-20 w-96 h-96 rounded-full bg-orange-400/5 animate-ripple"></div>
-          
-          {/* Ripple 2 */}
-          <div className="absolute top-40 -left-10 w-80 h-80 rounded-full bg-orange-500/5 animate-ripple animation-delay-1000"></div>
-          
-          {/* Ripple 3 */}
-          <div className="absolute bottom-0 right-20 w-64 h-64 rounded-full bg-orange-300/5 animate-ripple animation-delay-2000"></div>
-          
-          {/* Ripple 4 */}
-          <div className="absolute top-60 left-40 w-72 h-72 rounded-full bg-orange-400/5 animate-ripple animation-delay-3000"></div>
-          
-          {/* Ripple 5 */}
-          <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-orange-600/5 animate-ripple animation-delay-1500"></div>
+        {/* Floating Photos Background - Seperti di portofolio HTML */}
+        <div className="floating-shapes absolute inset-0 pointer-events-none z-0">
+          {projectPhotos.map((photo) => (
+            <div
+              key={photo.id}
+              className="shape absolute rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 cursor-pointer pointer-events-auto transition-all duration-500 hover:scale-110 hover:rotate-0 hover:z-50 hover:shadow-orange-500/30"
+              style={{
+                ...photo.style,
+                animation: `float ${6 + photo.id * 0.5}s ease-in-out infinite`,
+                animationDelay: `${photo.id * 0.3}s`,
+                filter: 'grayscale(40%) brightness(0.9)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.filter = 'grayscale(0%) brightness(1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.filter = 'grayscale(40%) brightness(0.9)';
+              }}
+            >
+              <img 
+                src={photo.img} 
+                alt={`Project ${photo.id}`}
+                className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+              />
+              
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
+                <span className="text-white text-xs font-semibold">Project {photo.id}</span>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Liquid Wave Effect */}
-        <div className="absolute inset-0 -z-10 opacity-30">
+        {/* Liquid Wave Effect - Tetap ada tapi lebih subtle */}
+        <div className="absolute inset-0 -z-10 opacity-20">
           <svg className="absolute top-0 left-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="wave" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <path d="M0 50 Q 25 30, 50 50 T 100 50" stroke="#f97316" fill="none" strokeWidth="0.5" opacity="0.3">
+                <path d="M0 50 Q 25 30, 50 50 T 100 50" stroke="#f97316" fill="none" strokeWidth="0.5" opacity="0.2">
                   <animate attributeName="d" 
                     values="M0 50 Q 25 30, 50 50 T 100 50; 
                             M0 50 Q 25 70, 50 50 T 100 50; 
                             M0 50 Q 25 30, 50 50 T 100 50" 
                     dur="8s" repeatCount="indefinite"/>
-                </path>
-                <path d="M0 60 Q 25 40, 50 60 T 100 60" stroke="#f97316" strokeWidth="0.5" opacity="0.2">
-                  <animate attributeName="d" 
-                    values="M0 60 Q 25 40, 50 60 T 100 60; 
-                            M0 60 Q 25 80, 50 60 T 100 60; 
-                            M0 60 Q 25 40, 50 60 T 100 60" 
-                    dur="7s" repeatCount="indefinite"/>
                 </path>
               </pattern>
             </defs>
@@ -112,14 +154,8 @@ const Hero = () => {
           </svg>
         </div>
 
-        {/* Floating Blobs */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-10 left-20 w-32 h-32 bg-orange-400/10 rounded-full filter blur-xl animate-floatBlob"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-orange-500/10 rounded-full filter blur-xl animate-floatBlob animation-delay-2000"></div>
-          <div className="absolute top-40 right-40 w-24 h-24 bg-orange-300/10 rounded-full filter blur-xl animate-floatBlob animation-delay-4000"></div>
-        </div>
-
-        <div className="overflow-hidden">
+        {/* Konten Text - Dengan z-index lebih tinggi dari foto */}
+        <div className="overflow-hidden relative z-20">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-wider my-8 animate-slideInLeft relative">
             <span className="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 bg-clip-text text-transparent relative z-10">
               GALVIN ALFITO D.
@@ -131,14 +167,14 @@ const Hero = () => {
           </h1>
         </div>
 
-        <div className="h-20 md:h-24">
+        <div className="h-20 md:h-24 relative z-20">
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-wider mb-4">
             <span className="text-white">{typedText}</span>
             <span className="animate-pulse text-3xl text-orange-300">|</span>
           </h2>
         </div>
 
-        <p className="text-base sm:text-lg tracking-wider text-gray-400 max-w-[25rem] lg:max-w-[30rem] mb-6 animate-fadeInUp relative">
+        <p className="text-base sm:text-lg tracking-wider text-gray-400 max-w-[25rem] lg:max-w-[30rem] mb-6 animate-fadeInUp relative z-20">
           Passionate web developer with expertise in modern web technologies. I create responsive, user-friendly websites and applications that deliver exceptional user experiences.
           
           {/* Accent Line */}
@@ -149,7 +185,7 @@ const Hero = () => {
       <Spline  
         className="
           absolute 
-          -z-20
+          -z-10
           lg:top-0 
           top-[40%]
           left-0
@@ -159,12 +195,13 @@ const Hero = () => {
           lg:h-full
           pointer-events-none
           animate-float
+          opacity-60
         "
         scene="https://prod.spline.design/mHdJc-tphylUCaps/scene.splinecode"
       />
 
       {/* Animated Scroll Indicator */}
-      <div className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-500 z-30 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <button 
           onClick={scrollToAbout}
           className="flex flex-col items-center text-gray-400 hover:text-orange-300 transition-colors duration-300 group"
@@ -177,7 +214,7 @@ const Hero = () => {
       </div>
 
       {/* Floating Social Icons */}
-      <div className="absolute left-5 bottom-1/2 transform -translate-y-1/2 hidden lg:flex flex-col gap-4">
+      <div className="absolute left-5 bottom-1/2 transform -translate-y-1/2 hidden lg:flex flex-col gap-4 z-30">
         {['github', 'linkedin', 'twitter', 'instagram'].map((social, index) => (
           <a
             key={social}
@@ -190,9 +227,48 @@ const Hero = () => {
         ))}
       </div>
 
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotate(var(--rotate-start, 0deg));
+          }
+          50% {
+            transform: translateY(-20px) rotate(var(--rotate-mid, 5deg));
+          }
+        }
+
+        .shape {
+          --rotate-start: 0deg;
+          --rotate-mid: 5deg;
+          animation: float 6s ease-in-out infinite;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(2px);
+        }
+
+        .shape:hover {
+          animation-play-state: paused;
+          box-shadow: 0 30px 50px -10px rgba(249, 115, 22, 0.5);
+        }
+
+        /* Menentukan rotasi awal untuk setiap shape */
+        .shape:nth-child(1) { --rotate-start: -5deg; --rotate-mid: 2deg; }
+        .shape:nth-child(2) { --rotate-start: 8deg; --rotate-mid: 12deg; }
+        .shape:nth-child(3) { --rotate-start: 12deg; --rotate-mid: 15deg; }
+        .shape:nth-child(4) { --rotate-start: -8deg; --rotate-mid: -2deg; }
+        .shape:nth-child(5) { --rotate-start: 15deg; --rotate-mid: 20deg; }
+        .shape:nth-child(6) { --rotate-start: -12deg; --rotate-mid: -5deg; }
+
+        @media (max-width: 768px) {
+          .shape {
+            opacity: 0.3;
+          }
+          .shape:hover {
+            opacity: 1;
+          }
+        }
+      `}</style>
     </main>
   )
 }
 
 export default Hero;
-
