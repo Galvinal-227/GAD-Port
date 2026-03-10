@@ -15,7 +15,6 @@ const Contact = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [buttonState, setButtonState] = useState('default'); // 'default', 'sending', 'sent'
 
   const sectionRef = useRef(null);
   const formRef = useRef(null);
@@ -24,7 +23,6 @@ const Contact = () => {
   const contactItemsRef = useRef([]);
   const socialLinksRef = useRef([]);
   const inputRefs = useRef([]);
-  const submitBtnRef = useRef(null);
 
   const socialLinks = [
     { 
@@ -119,151 +117,18 @@ const Contact = () => {
     });
   };
 
-  // Helper untuk membaca CSS variable
-  const getVar = (variable) => {
-    if (!submitBtnRef.current) return '';
-    return getComputedStyle(submitBtnRef.current).getPropertyValue(variable).trim();
-  };
-
-  const animateButton = async () => {
-    if (!submitBtnRef.current) return;
-
-    setButtonState('sending');
-
-    // Timeline untuk animasi wing transformations
-    gsap.to(submitBtnRef.current, {
-      keyframes: [
-        {
-          '--left-wing-first-x': 50,
-          '--left-wing-first-y': 100,
-          '--right-wing-second-x': 50,
-          '--right-wing-second-y': 100,
-          duration: 0.2,
-          onComplete() {
-            gsap.set(submitBtnRef.current, {
-              '--left-wing-first-y': 0,
-              '--left-wing-second-x': 40,
-              '--left-wing-second-y': 100,
-              '--left-wing-third-x': 0,
-              '--left-wing-third-y': 100,
-              '--left-body-third-x': 40,
-              '--right-wing-first-x': 50,
-              '--right-wing-first-y': 0,
-              '--right-wing-second-x': 60,
-              '--right-wing-second-y': 100,
-              '--right-wing-third-x': 100,
-              '--right-wing-third-y': 100,
-              '--right-body-third-x': 60
-            });
-          }
-        },
-        {
-          '--left-wing-third-x': 20,
-          '--left-wing-third-y': 90,
-          '--left-wing-second-y': 90,
-          '--left-body-third-y': 90,
-          '--right-wing-third-x': 80,
-          '--right-wing-third-y': 90,
-          '--right-body-third-y': 90,
-          '--right-wing-second-y': 90,
-          duration: 0.2
-        },
-        {
-          '--rotate': 50,
-          '--left-wing-third-y': 95,
-          '--left-wing-third-x': 27,
-          '--right-body-third-x': 45,
-          '--right-wing-second-x': 45,
-          '--right-wing-third-x': 60,
-          '--right-wing-third-y': 83,
-          duration: 0.25
-        },
-        {
-          '--rotate': 55,
-          '--plane-x': -8,
-          '--plane-y': 24,
-          duration: 0.2
-        },
-        {
-          '--rotate': 40,
-          '--plane-x': 45,
-          '--plane-y': -180,
-          '--plane-opacity': 0,
-          duration: 0.3
-        }
-      ]
-    });
-
-    // Timeline untuk text & colors
-    gsap.to(submitBtnRef.current, {
-      keyframes: [
-        {
-          '--text-opacity': 0,
-          '--border-radius': 0,
-          '--left-wing-background': '#133FC0',
-          '--right-wing-background': '#133FC0',
-          duration: 0.1
-        },
-        {
-          '--left-wing-background': '#275EFE',
-          '--right-wing-background': '#275EFE',
-          duration: 0.1
-        },
-        {
-          '--left-body-background': '#2055EE',
-          '--right-body-background': '#133FC0',
-          duration: 0.4
-        },
-        {
-          '--success-opacity': 1,
-          '--success-scale': 1,
-          duration: 0.25,
-          delay: 0.25,
-          onComplete: () => {
-            setButtonState('sent');
-          }
-        }
-      ]
-    });
-  };
-
-  const resetButton = () => {
-    if (!submitBtnRef.current) return;
-
-    // Reset semua inline styles
-    submitBtnRef.current.removeAttribute('style');
-    
-    // Fade in lagi
-    gsap.fromTo(submitBtnRef.current, 
-      { opacity: 0, y: -8 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        clearProps: true, 
-        duration: 0.3,
-        onComplete: () => {
-          setButtonState('default');
-          // Pastikan tidak ada stale inline vars
-          submitBtnRef.current.removeAttribute('style');
-        }
-      }
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (buttonState !== 'default') return;
-    
     setIsSubmitting(true);
 
-    // EmailJS configuration
+    // EmailJS configuration - GANTI DENGAN DATA LU SENDIRI
     const serviceID = 'service_njv03cr';
     const templateID = 'template_jk6dacb';
     const userID = 'HOWiXGN-zDmo063ZS';
 
     try {
-      // Animasi submit untuk form
+      // Animasi submit
+      const submitBtn = e.target.querySelector('button[type="submit"]');
       const formElements = formRef.current.querySelectorAll('.input-field');
       
       // Shrink animation
@@ -281,9 +146,6 @@ const Contact = () => {
         stagger: 0.1
       });
 
-      // Jalankan animasi tombol
-      await animateButton();
-
       // Kirim email via EmailJS
       await emailjs.send(serviceID, templateID, {
         from_name: formData.name,
@@ -292,7 +154,7 @@ const Contact = () => {
         to_name: 'Galvin Alfito'
       }, userID);
 
-      // Success animation untuk form
+      // Success animation
       gsap.to(formRef.current, {
         rotationY: 360,
         duration: 1,
@@ -315,19 +177,12 @@ const Contact = () => {
               y: 0,
               duration: 0.3
             });
-
-            // Reset button setelah 2 detik
-            setTimeout(() => {
-              resetButton();
-            }, 2000);
           }, 1000);
         }
       });
 
     } catch (error) {
       console.error('Error sending email:', error);
-      
-      setButtonState('default');
       
       // Error animation
       gsap.to(formRef.current, {
@@ -358,10 +213,10 @@ const Contact = () => {
     
     // Extreme 3D rotation berdasarkan cursor
     gsap.to(formRef.current, {
-      rotationY: x * 25,
-      rotationX: -y * 20,
-      x: x * 20,
-      y: y * 15,
+      rotationY: x * 25, // Rotasi horizontal lebih extreme
+      rotationX: -y * 20, // Rotasi vertical lebih extreme
+      x: x * 20, // Pergeseran horizontal lebih jauh
+      y: y * 15, // Pergeseran vertical
       duration: 0.5,
       ease: "power2.out"
     });
@@ -831,153 +686,24 @@ const Contact = () => {
                 </div>
 
                 <button 
-                  ref={submitBtnRef}
                   type="submit"
-                  disabled={isSubmitting || buttonState !== 'default'}
-                  className="send-button w-full text-white py-4 px-8 rounded-xl font-bold text-lg tracking-wider transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform-style-3d relative overflow-hidden group"
-                  style={{
-                    '--primary': '#275EFE',
-                    '--primary-dark': '#2055EE',
-                    '--primary-darkest': '#133FC0',
-                    '--text': '#FFFFFF',
-                    '--text-opacity': 1,
-                    '--success': '#2B3044',
-                    '--success-scale': 0.2,
-                    '--success-opacity': 0,
-                    '--border-radius': 7,
-                    '--overflow': 'hidden',
-                    '--rotate': 0,
-                    '--plane-x': 0,
-                    '--plane-y': 0,
-                    '--plane-opacity': 1,
-                    '--left-wing-background': 'var(--primary)',
-                    '--left-wing-first-x': 0,
-                    '--left-wing-first-y': 0,
-                    '--left-wing-second-x': 50,
-                    '--left-wing-second-y': 0,
-                    '--left-wing-third-x': 0,
-                    '--left-wing-third-y': 100,
-                    '--left-body-background': 'var(--primary)',
-                    '--left-body-first-x': 50,
-                    '--left-body-first-y': 0,
-                    '--left-body-second-x': 50,
-                    '--left-body-second-y': 100,
-                    '--left-body-third-x': 0,
-                    '--left-body-third-y': 100,
-                    '--right-wing-background': 'var(--primary)',
-                    '--right-wing-first-x': 50,
-                    '--right-wing-first-y': 0,
-                    '--right-wing-second-x': 100,
-                    '--right-wing-second-y': 0,
-                    '--right-wing-third-x': 100,
-                    '--right-wing-third-y': 100,
-                    '--right-body-background': 'var(--primary)',
-                    '--right-body-first-x': 50,
-                    '--right-body-first-y': 0,
-                    '--right-body-second-x': 50,
-                    '--right-body-second-y': 100,
-                    '--right-body-third-x': 100,
-                    '--right-body-third-y': 100,
-                  }}
+                  disabled={isSubmitting}
+                  className="submit-btn w-full bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-4 px-8 rounded-xl font-bold text-lg tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform-style-3d relative overflow-hidden group"
                 >
-                  <span className="default" style={{ 
-                    display: 'block',
-                    position: 'relative',
-                    zIndex: 4,
-                    opacity: 'var(--text-opacity)'
-                  }}>
-                    Send Message
-                    <i className="bx bx-paper-plane text-xl ml-2"></i>
-                  </span>
-                  <span className="success" style={{
-                    zIndex: 0,
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    top: '8px',
-                    transform: 'rotate(calc(var(--rotate) * -1deg)) scale(var(--success-scale)) translateZ(0)',
-                    opacity: 'var(--success-opacity)',
-                    color: 'var(--success)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    Sent!
-                    <i className="bx bx-check-circle text-xl"></i>
-                  </span>
-                  <div className="left" style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    opacity: 'var(--plane-opacity)',
-                    transform: 'translate(calc(var(--plane-x) * 1px), calc(var(--plane-y) * 1px)) translateZ(0)'
-                  }}>
-                    <div className="wing-left" style={{
-                      content: '',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      right: 0,
-                      bottom: 0,
-                      borderRadius: 'calc(var(--border-radius) * 1px)',
-                      transform: 'translate(0.4%, 0) translateZ(0)',
-                      zIndex: 2,
-                      background: 'var(--left-wing-background)',
-                      clipPath: 'polygon(calc(var(--left-wing-first-x) * 1%) calc(var(--left-wing-first-y) * 1%), calc(var(--left-wing-second-x) * 1%) calc(var(--left-wing-second-y) * 1%), calc(var(--left-wing-third-x) * 1%) calc(var(--left-wing-third-y) * 1%))'
-                    }}></div>
-                    <div className="body-left" style={{
-                      content: '',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      right: 0,
-                      bottom: 0,
-                      borderRadius: 'calc(var(--border-radius) * 1px)',
-                      transform: 'translate(0, 0) translateZ(0)',
-                      zIndex: 1,
-                      background: 'var(--left-body-background)',
-                      clipPath: 'polygon(calc(var(--left-body-first-x) * 1%) calc(var(--left-body-first-y) * 1%), calc(var(--left-body-second-x) * 1%) calc(var(--left-body-second-y) * 1%), calc(var(--left-body-third-x) * 1%) calc(var(--left-body-third-y) * 1%))'
-                    }}></div>
-                  </div>
-                  <div className="right" style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    opacity: 'var(--plane-opacity)',
-                    transform: 'translate(calc(var(--plane-x) * 1px), calc(var(--plane-y) * 1px)) translateZ(0)'
-                  }}>
-                    <div className="wing-right" style={{
-                      content: '',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      right: 0,
-                      bottom: 0,
-                      borderRadius: 'calc(var(--border-radius) * 1px)',
-                      transform: 'translate(-0.4%, 0) translateZ(0)',
-                      zIndex: 2,
-                      background: 'var(--right-wing-background)',
-                      clipPath: 'polygon(calc(var(--right-wing-first-x) * 1%) calc(var(--right-wing-first-y) * 1%), calc(var(--right-wing-second-x) * 1%) calc(var(--right-wing-second-y) * 1%), calc(var(--right-wing-third-x) * 1%) calc(var(--right-wing-third-y) * 1%))'
-                    }}></div>
-                    <div className="body-right" style={{
-                      content: '',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      right: 0,
-                      bottom: 0,
-                      borderRadius: 'calc(var(--border-radius) * 1px)',
-                      transform: 'translate(0, 0) translateZ(0)',
-                      zIndex: 1,
-                      background: 'var(--right-body-background)',
-                      clipPath: 'polygon(calc(var(--right-body-first-x) * 1%) calc(var(--right-body-first-y) * 1%), calc(var(--right-body-second-x) * 1%) calc(var(--right-body-second-y) * 1%), calc(var(--right-body-third-x) * 1%) calc(var(--right-body-third-y) * 1%))'
-                    }}></div>
-                  </div>
+                  {/* Button Shine Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <i className="bx bx-paper-plane text-xl"></i>
+                    </>
+                  )}
                 </button>
               </form>
 
@@ -1029,73 +755,6 @@ const Contact = () => {
           box-shadow: 
             0 25px 50px -12px rgba(0, 0, 0, 0.5),
             0 0 0 1px rgba(255, 255, 255, 0.1);
-        }
-
-        /* Send button styles */
-        .send-button {
-          display: block;
-          cursor: pointer;
-          position: relative;
-          border: 0;
-          padding: 8px 0;
-          min-width: 100px;
-          text-align: center;
-          margin: 0;
-          line-height: 24px;
-          font-family: inherit;
-          font-weight: 500;
-          font-size: 14px;
-          background: none;
-          outline: none;
-          color: var(--text);
-          transform: rotate(calc(var(--rotate) * 1deg)) translateZ(0);
-          -webkit-appearance: none;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .send-button .left,
-        .send-button .right {
-          position: absolute;
-          left: 0;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          opacity: var(--plane-opacity);
-          transform: translate(calc(var(--plane-x) * 1px), calc(var(--plane-y) * 1px)) translateZ(0);
-        }
-
-        .send-button .left .wing-left,
-        .send-button .left .body-left,
-        .send-button .right .wing-right,
-        .send-button .right .body-right {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          border-radius: calc(var(--border-radius) * 1px);
-          transform: translate(var(--x, 0.4%), var(--y, 0)) translateZ(0);
-          z-index: var(--z-index, 2);
-          background: var(--background, var(--left-wing-background));
-        }
-
-        .send-button span {
-          display: block;
-          position: relative;
-          z-index: 4;
-          opacity: var(--text-opacity);
-        }
-
-        .send-button span.success {
-          z-index: 0;
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 8px;
-          transform: rotate(calc(var(--rotate) * -1deg)) scale(var(--success-scale)) translateZ(0);
-          opacity: var(--success-opacity);
-          color: var(--success);
         }
       `}</style>
     </section>
