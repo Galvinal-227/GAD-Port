@@ -343,7 +343,7 @@ const About = () => {
                 <img 
                   src="/Cursorr.jpg" 
                   alt="wok cursor"
-                  className="w-full h-full object-cover rounded-full border-2 border-orange-500"
+                  className="w-full h-full object-cover"
                 />
               </div>
             )}
