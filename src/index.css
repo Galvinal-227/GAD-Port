@@ -336,3 +336,8 @@ html {
 .animation-delay-4000 {
   animation-delay: 4000ms;
 }
+
+/* Di global CSS atau tailwind config */
+.will-change-transform {
+  will-change: transform;
+}
