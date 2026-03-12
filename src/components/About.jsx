@@ -16,6 +16,7 @@ const About = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isCvLoading, setIsCvLoading] = useState(false);
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   
@@ -75,26 +76,25 @@ const About = () => {
     if (!imageContainerRef.current) return;
     
     const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - left) / width - 0.5) * 2;
-    const y = ((e.clientY - top) / height - 0.5) * 2;
+    const x = (e.clientX - left) / width - 0.5;
+    const y = (e.clientY - top) / height - 0.5;
     
-    setMousePosition({ x, y });
+    const pointerX = Math.min(1, Math.max(-1, x * 2)).toFixed(2);
+    const pointerY = Math.min(1, Math.max(-1, y * 2)).toFixed(2);
+    
+    setMousePosition({ x: pointerX, y: pointerY });
   };
 
   const handleMouseLeave = () => {
     setMousePosition({ x: 0, y: 0 });
-    
-    gsap.to(imageRef.current, {
-      rotationY: 0,
-      rotationX: 0,
-      x: 0,
-      y: 0,
-      duration: 1,
-      ease: "elastic.out(1, 0.5)"
-    });
   };
 
   useEffect(() => {
+    // Aktifkan card setelah 500ms (seperti di Galvin Card)
+    setTimeout(() => {
+      setIsActive(true);
+    }, 500);
+
     if (imageContainerRef.current) {
       imageContainerRef.current.addEventListener('mousemove', handleMouseMove);
       imageContainerRef.current.addEventListener('mouseleave', handleMouseLeave);
@@ -224,30 +224,23 @@ const About = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!imageRef.current) return;
-
-    const { x, y } = mousePosition;
-    
-    // Efek 3D rotation saat mouse bergerak
-    gsap.to(imageRef.current, {
-      rotationY: x * 10,
-      rotationX: -y * 8,
-      x: x * 8,
-      y: y * 8,
-      duration: 0.8,
-      ease: "power2.out"
-    });
-
-  }, [mousePosition]);
-
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden min-h-screen">
-      {/* Background Elements */}
+      {/* Background Elements - Grid pattern from Galvin Card */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '45px 45px',
+            mask: 'linear-gradient(-20deg, transparent 50%, white)'
+          }}
+        />
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-800 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-900 rounded-full blur-3xl opacity-10"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-20">
@@ -372,20 +365,98 @@ const About = () => {
             </div>
           </div>
 
-          {/* Profile Image with Morphing Effect - Menggunakan foto dari Galvin Card */}
+          {/* Profile Image dengan animasi dari Galvin Card */}
           <div 
             ref={imageContainerRef}
             className="relative cursor-pointer group"
+            data-active={isActive}
           >
-            {/* Profile Frame dengan efek morphing */}
+            {/* Card container dengan efek 3D */}
             <div 
               ref={imageRef}
-              className="profile-frame w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] relative overflow-hidden shadow-2xl"
+              className="relative w-[350px] h-[350px] lg:w-[400px] lg:h-[400px]"
+              style={{
+                perspective: '1600px',
+                transformStyle: 'preserve-3d',
+                transform: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0) 
+                  ? `rotateX(${mousePosition.y * 25}deg) rotateY(${mousePosition.x * -20}deg)`
+                  : 'none',
+                transition: 'transform 0.2s'
+              }}
             >
-              <img 
-                src="/profile.png" 
-                alt="Galvin Alfito D - Web Developer" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              {/* Profile image dengan efek 3D */}
+              <div className="relative w-full h-full overflow-hidden rounded-3xl"
+                style={{
+                  clipPath: 'inset(0 0 0 0 round 2rem)',
+                  border: '4px solid rgba(255,255,255,0.1)',
+                  transform: 'translateZ(20px)',
+                  boxShadow: '0 25px 50px -12px rgba(249, 115, 22, 0.3)'
+                }}
+              >
+                <img 
+                  src="/profile.png" 
+                  alt="Galvin Alfito D - Web Developer" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  style={{
+                    filter: 'brightness(0.85)',
+                    transform: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0)
+                      ? `translate(${mousePosition.x * 5}%, ${mousePosition.y * 5}%)`
+                      : 'none',
+                    transition: 'transform 0.2s'
+                  }}
+                />
+              </div>
+
+              {/* Refraction effects dari Galvin Card */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+                <div 
+                  className="absolute w-[500%] aspect-square bottom-0 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    background: 'radial-gradient(circle at 0 100%, transparent 10%, hsl(5 100% 80%), hsl(150 100% 60%), hsl(220 90% 70%), transparent 60%)',
+                    transformOrigin: '0 100%',
+                    scale: Math.min(1, 0.15 + Math.abs(mousePosition.x) * 0.25),
+                    translate: `clamp(-10%, -10% + ${mousePosition.x * 10}%, 10%) calc(max(0%, ${-mousePosition.y * 10}%))`,
+                    filter: 'saturate(2)'
+                  }}
+                />
+                <div 
+                  className="absolute w-[500%] aspect-square top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    background: 'radial-gradient(circle at 100% 0, transparent 10%, hsl(5 100% 80%), hsl(150 100% 60%), hsl(220 90% 70%), transparent 60%)',
+                    transformOrigin: '100% 0',
+                    scale: Math.min(1, 0.15 + -mousePosition.x * 0.65),
+                    translate: `clamp(-10%, 10% - ${-mousePosition.x * -10}%, 10%) calc(min(0%, ${-mousePosition.y * -10}%))`,
+                    filter: 'saturate(2)'
+                  }}
+                />
+              </div>
+
+              {/* Spotlight effect */}
+              <div 
+                className="absolute inset-0 mix-blend-overlay pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                style={{
+                  clipPath: 'inset(0 0 0 0 round 2rem)',
+                  zIndex: 9999
+                }}
+              >
+                <div 
+                  className="absolute left-1/2 top-1/2 w-[500%] aspect-square"
+                  style={{
+                    background: 'radial-gradient(rgba(255,255,255,0.4) 0 2%, rgba(0,0,0,0.2) 20%)',
+                    filter: 'brightness(1.2) contrast(1.2)',
+                    translate: `calc(-50% + ${mousePosition.x * 20}%) calc(-50% + ${mousePosition.y * 20}%)`,
+                    zIndex: 9999
+                  }}
+                />
+              </div>
+
+              {/* Glare effect */}
+              <div 
+                className="absolute inset-0 opacity-50 pointer-events-none rounded-3xl"
+                style={{
+                  background: 'linear-gradient(-65deg, transparent 0 40%, white 40% 50%, transparent 30% 50%, transparent 50% 55%, white 55% 60%, transparent 60% 100%)',
+                  zIndex: 9998
+                }}
               />
             </div>
 
@@ -434,25 +505,19 @@ const About = () => {
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes morphing {
-          0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-          25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
-          50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
-          75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
-          100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-        }
-
-        .profile-frame {
-          animation: morphing 10s ease-in-out infinite;
-          background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(234,179,8,0.2));
-          box-shadow: 0 25px 50px -12px rgba(249, 115, 22, 0.3);
-        }
-
-        .profile-frame:hover {
-          animation-duration: 3s;
-        }
-      `}</style>
+      {/* SVG Filters untuk efek lighting */}
+      <svg className="sr-only">
+        <defs>
+          <filter id="lighting">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
+            <feSpecularLighting result="lighting" in="blur" surfaceScale="8" specularConstant="12" specularExponent="120" lightingColor="hsl(0 0% 6%)">
+              <fePointLight x="50" y="50" z="300" />
+            </feSpecularLighting>
+            <feComposite in="lighting" in2="SourceAlpha" operator="in" result="composite" />
+            <feComposite in="SourceGraphic" in2="composite" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litPaint" />
+          </filter>
+        </defs>
+      </svg>
     </section>
   );
 };
