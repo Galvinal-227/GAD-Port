@@ -16,7 +16,7 @@ const About = () => {
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
-  const galvinCardUrl = "https://github.com/Galvinal-227/ME-"; 
+  const galvinCardUrl = "https://galvinal-227.github.io/ME-/"; 
   const handleCvClick = () => {
     setIsCvLoading(true);
     setTimeout(() => {
