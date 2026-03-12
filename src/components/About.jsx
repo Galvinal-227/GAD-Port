@@ -373,8 +373,11 @@ const About = () => {
               style={{
                 width: '60px',
                 height: '60px',
-                transform: 'translate(-9999px, -9999px)', // Hide initially
-                willChange: 'transform' // Optimasi performa
+                transform: 'translate(-9999px, -9999px)',
+                willChange: 'transform',
+                transition: 'opacity 0.15s ease', // tambah ini
+                backfaceVisibility: 'hidden', // tambah ini
+                WebkitFontSmoothing: 'antialiased' // tambah ini
               }}
             >
               <img 
