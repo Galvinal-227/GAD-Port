@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { debounce } from 'lodash'; // atau buat custom debounce
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -12,15 +11,14 @@ const About = () => {
   const toolsRef = useRef([]);
   const statsRef = useRef([]);
   const profileRef = useRef(null);
-  const cursorRef = useRef(null); // Ref untuk cursor element
+  const cursorRef = useRef(null);
   
   const [isCvLoading, setIsCvLoading] = useState(false);
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
   const [isHoveringProfile, setIsHoveringProfile] = useState(false);
   
-  // Gunakan ref untuk cursor position (tidak trigger re-render)
-  const cursorPosRef = useRef({ x: 0, y: 0 });
-  const rafRef = useRef(null);
+  // Sederhanakan cursor - pakai state biasa aja
+  const [cursorPos, setCursorPos] = useState({ x: -9999, y: -9999 });
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
@@ -75,41 +73,16 @@ const About = () => {
     }
   };
 
-  // Optimasi dengan requestAnimationFrame
-  const updateCursorPosition = useCallback((e) => {
-    if (profileRef.current && cursorRef.current) {
+  // Sederhanakan mouse move - tanpa RAF kompleks
+  const handleMouseMove = (e) => {
+    if (profileRef.current) {
       const rect = profileRef.current.getBoundingClientRect();
-      cursorPosRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-      
-      // Apply transform langsung ke DOM element tanpa re-render
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate(${cursorPosRef.current.x - 40}px, ${cursorPosRef.current.y - 40}px)`;
-      }
+      setCursorPos({
+        x: e.clientX - rect.left - 30, // 30 = setengah lebar cursor (60/2)
+        y: e.clientY - rect.top - 30
+      });
     }
-  }, []);
-
-  // Throttled mouse move handler
-  const handleMouseMove = useCallback((e) => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-    }
-    
-    rafRef.current = requestAnimationFrame(() => {
-      updateCursorPosition(e);
-    });
-  }, [updateCursorPosition]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, []);
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -213,25 +186,16 @@ const About = () => {
 
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden min-h-screen">
-      {/* Background Grid Pattern */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          '--size': '45px',
-          '--line': 'rgba(255,255,255,0.1)',
-          background: `
-            linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) calc(var(--size) * 0.36) 50% / var(--size) var(--size),
-            linear-gradient(var(--line) 1px, transparent 1px var(--size)) 0% calc(var(--size) * 0.32) / var(--size) var(--size)
-          `,
-          mask: 'linear-gradient(-20deg, transparent 50%, white)',
-          zIndex: -1
-        }}
-      />
+      {/* Background Grid Pattern - SEDERHANAKAN */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
+        backgroundImage: 'radial-gradient(circle at 1px 1px, gray 1px, transparent 0)',
+        backgroundSize: '40px 40px'
+      }} />
 
       <div className="max-w-7xl mx-auto relative z-20">
         <div className="text-center mb-16 relative">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            About <span className="bg-clip-text text-white">Me</span>
+            About <span className="text-white">Me</span>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-yellow-500 mx-auto mb-6 rounded-full"></div>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mb-8">
@@ -241,7 +205,7 @@ const About = () => {
 
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <div ref={textRef} className="flex-1">
-            <h3 className="text-3xl font-bold mb-6 tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <h3 className="text-3xl font-bold mb-6 tracking-tight text-white">
               Creative Full-Stack Developer
             </h3>
             
@@ -258,7 +222,7 @@ const About = () => {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 mb-10">
               <div>
-                <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3">
+                <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3 text-white">
                   <i className="bx bx-code-block text-orange-400"></i>
                   Technical Skills
                 </h4>
@@ -267,7 +231,7 @@ const About = () => {
                     <div
                       key={skill.name}
                       ref={addToSkillsRefs}
-                      className="skill-item group cursor-pointer p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 hover:border-orange-500 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20"
+                      className="p-4 rounded-xl bg-gray-800/50 border border-gray-700"
                     >
                       <div className="flex items-center gap-3">
                         <i className={`${skill.icon} text-orange-400 text-xl`}></i>
@@ -279,7 +243,7 @@ const About = () => {
               </div>
 
               <div>
-                <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3">
+                <h4 className="text-2xl font-bold mb-6 tracking-tight flex items-center gap-3 text-white">
                   <i className="bx bx-cog text-yellow-400"></i>
                   Tools & Technologies
                 </h4>
@@ -288,7 +252,7 @@ const About = () => {
                     <div
                       key={tool.name}
                       ref={addToToolsRefs}
-                      className="tool-item flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 cursor-pointer hover:border-yellow-500 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/20"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-gray-800 border border-gray-700"
                     >
                       <i className={`${tool.icon} ${tool.color} text-xl`}></i>
                       <span className="text-gray-300 text-sm font-medium">{tool.name}</span>
@@ -301,7 +265,7 @@ const About = () => {
             <div className="flex gap-4 flex-wrap items-center">
               <a
                 href="#contact"
-                className="bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 flex items-center gap-3 hover:scale-105"
+                className="bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-4 px-8 rounded-2xl font-semibold tracking-wider flex items-center gap-3"
               >
                 <span>Get In Touch</span>
                 <i className="bx bx-chat text-xl"></i>
@@ -310,7 +274,7 @@ const About = () => {
               <button
                 onClick={handleProjectsClick}
                 disabled={isProjectsLoading}
-                className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-orange-500 hover:text-white hover:bg-orange-500/10 flex items-center gap-3 group ${
+                className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider flex items-center gap-3 ${
                   isProjectsLoading ? 'pointer-events-none opacity-75' : ''
                 }`}
               >
@@ -322,8 +286,7 @@ const About = () => {
                 ) : (
                   <>
                     <span>View Projects</span>
-                    <i className="bx bx-folder-open text-xl group-hover:animate-pulse"></i>
-                    <i className="bx bx-link-external text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    <i className="bx bx-folder-open text-xl"></i>
                   </>
                 )}
               </button>
@@ -331,7 +294,7 @@ const About = () => {
               <button
                 onClick={handleCvClick}
                 disabled={isCvLoading}
-                className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider transition-all duration-300 hover:border-yellow-500 hover:text-white hover:bg-yellow-500/10 flex items-center gap-3 group ${
+                className={`border-2 border-gray-700 text-gray-300 py-4 px-8 rounded-2xl font-semibold tracking-wider flex items-center gap-3 ${
                   isCvLoading ? 'pointer-events-none opacity-75' : ''
                 }`}
               >
@@ -343,66 +306,59 @@ const About = () => {
                 ) : (
                   <>
                     <span>Download CV</span>
-                    <i className="bx bx-download text-xl group-hover:animate-bounce"></i>
+                    <i className="bx bx-download text-xl"></i>
                   </>
                 )}
               </button>
             </div>
           </div>
 
-          {/* Profile Image dengan Custom Cursor - Foto Wok Saja - OPTIMIZED */}
+          {/* Profile Image - SEDERHANAKAN BANGET */}
           <div 
             ref={profileRef}
-            className="relative group"
+            className="relative"
             onMouseEnter={() => setIsHoveringProfile(true)}
             onMouseLeave={() => {
               setIsHoveringProfile(false);
-              // Reset cursor position when leaving
-              if (cursorRef.current) {
-                cursorRef.current.style.transform = 'translate(-9999px, -9999px)';
-              }
+              setCursorPos({ x: -9999, y: -9999 });
             }}
             onMouseMove={handleMouseMove}
           >
-            {/* Custom Cursor - Hanya Foto Wok - Sekarang menggunakan transform langsung */}
-            <div 
-              ref={cursorRef}
-              className={`absolute pointer-events-none z-50 transition-opacity duration-150 ${
-                isHoveringProfile ? 'opacity-100' : 'opacity-0'
-              }`}
-              style={{
-                width: '60px',
-                height: '60px',
-                transform: 'translate(-9999px, -9999px)',
-                willChange: 'transform',
-                transition: 'opacity 0.15s ease', // tambah ini
-                backfaceVisibility: 'hidden', // tambah ini
-                WebkitFontSmoothing: 'antialiased' // tambah ini
-              }}
-            >
-              <img 
-                src="/Cursorr.jpg" 
-                alt="wok cursor"
-                className="w-full h-full object-cover rounded-full shadow-2xl"
-                loading="eager" // Load immediately
-              />
-            </div>
+            {/* Custom Cursor */}
+            {isHoveringProfile && (
+              <div 
+                className="absolute pointer-events-none z-50"
+                style={{
+                  left: cursorPos.x,
+                  top: cursorPos.y,
+                  width: '60px',
+                  height: '60px',
+                  transition: 'left 0.05s, top 0.05s' // kasih transisi dikit biar halus
+                }}
+              >
+                <img 
+                  src="/Cursorr.jpg" 
+                  alt="cursor"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+            )}
 
-            <div className="relative w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-3xl border-4 border-gray-700 group-hover:border-orange-500 transition-all duration-300 shadow-2xl">
+            {/* Profile Image - HAPUS SEMUA ANIMASI */}
+            <div className="w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-3xl border-4 border-gray-700">
               <img 
                 src="/profile.png" 
-                alt="Galvin Alfito D - Web Developer" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="eager"
+                alt="Galvin Alfito D" 
+                className="w-full h-full object-cover"
               />
             </div>
 
-            {/* Decorative Elements */}
-            <div className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
+            {/* Decorative Elements - HAPUS SEMUA ANIMASI */}
+            <div className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
 
-            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
+            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-heart text-white text-xl"></i>
             </div>
 
@@ -415,7 +371,7 @@ const About = () => {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats - SEDERHANAKAN */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-gray-800">
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
@@ -426,9 +382,9 @@ const About = () => {
             <div
               key={stat.label}
               ref={addToStatsRefs}
-              className="text-center group cursor-pointer hover:transform hover:scale-110 transition-all duration-300"
+              className="text-center"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-to-br group-hover:from-orange-500/30 group-hover:to-yellow-500/30 transition-all duration-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <i className={`${stat.icon} text-2xl text-yellow-400`}></i>
               </div>
               <h4 className="text-2xl font-bold text-white mb-2">{stat.number}</h4>
