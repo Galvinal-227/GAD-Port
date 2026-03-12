@@ -6,20 +6,20 @@ gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
   const sectionRef = useRef(null);
-  const imageRef = useRef(null);
-  const imageContainerRef = useRef(null);
+  const cardRef = useRef(null);
+  const cardContentRef = useRef(null);
+  const frontImgRef = useRef(null);
   const textRef = useRef(null);
   const skillsRef = useRef([]);
   const toolsRef = useRef([]);
   const statsRef = useRef([]);
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isActive, setIsActive] = useState(false);
   const [isCvLoading, setIsCvLoading] = useState(false);
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
-  const [isActive, setIsActive] = useState(false);
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
-  
   const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
 
   const handleCvClick = () => {
@@ -73,14 +73,17 @@ const About = () => {
   };
 
   const handleMouseMove = (e) => {
-    if (!imageContainerRef.current) return;
+    if (!cardRef.current) return;
     
-    const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect();
-    const x = (e.clientX - left) / width - 0.5;
-    const y = (e.clientY - top) / height - 0.5;
-    
-    const pointerX = Math.min(1, Math.max(-1, x * 2)).toFixed(2);
-    const pointerY = Math.min(1, Math.max(-1, y * 2)).toFixed(2);
+    const bounds = cardRef.current.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    const posX = x - bounds.left;
+    const posY = y - bounds.top;
+    const ratioX = posX / bounds.width - 0.5;
+    const ratioY = posY / bounds.height - 0.5;
+    const pointerX = Math.min(1, Math.max(-1, ratioX * 2));
+    const pointerY = Math.min(1, Math.max(-1, ratioY * 2));
     
     setMousePosition({ x: pointerX, y: pointerY });
   };
@@ -90,14 +93,23 @@ const About = () => {
   };
 
   useEffect(() => {
-    // Aktifkan card setelah 500ms (seperti di Galvin Card)
+    // Run reveal after 500ms like Galvin Card
     setTimeout(() => {
       setIsActive(true);
+      
+      // Glare animation
+      if (cardRef.current) {
+        const glare = cardRef.current.querySelector('.glare');
+        if (glare) {
+          glare.style.transition = 'transform 0.65s ease-in-out';
+          glare.style.transform = 'translateX(-100%)';
+        }
+      }
     }, 500);
 
-    if (imageContainerRef.current) {
-      imageContainerRef.current.addEventListener('mousemove', handleMouseMove);
-      imageContainerRef.current.addEventListener('mouseleave', handleMouseLeave);
+    if (cardRef.current) {
+      cardRef.current.addEventListener('mousemove', handleMouseMove);
+      cardRef.current.addEventListener('mouseleave', handleMouseLeave);
     }
 
     const ctx = gsap.context(() => {
@@ -111,25 +123,6 @@ const About = () => {
           ease: "power3.out",
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-
-      // Profile image animation
-      gsap.fromTo(imageRef.current,
-        {
-          scale: 0.8,
-          opacity: 0,
-        },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 1.8,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: imageRef.current,
             start: "top 80%",
             toggleActions: "play none none reverse"
           }
@@ -217,31 +210,29 @@ const About = () => {
 
     return () => {
       ctx.revert();
-      if (imageContainerRef.current) {
-        imageContainerRef.current.removeEventListener('mousemove', handleMouseMove);
-        imageContainerRef.current.removeEventListener('mouseleave', handleMouseLeave);
+      if (cardRef.current) {
+        cardRef.current.removeEventListener('mousemove', handleMouseMove);
+        cardRef.current.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
   }, []);
 
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden min-h-screen">
-      {/* Background Elements - Grid pattern from Galvin Card */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '45px 45px',
-            mask: 'linear-gradient(-20deg, transparent 50%, white)'
-          }}
-        />
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-800 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-      </div>
+      {/* Background Grid Pattern - PERSIS seperti Galvin Card */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          '--size': '45px',
+          '--line': 'rgba(255,255,255,0.1)',
+          background: `
+            linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) calc(var(--size) * 0.36) 50% / var(--size) var(--size),
+            linear-gradient(var(--line) 1px, transparent 1px var(--size)) 0% calc(var(--size) * 0.32) / var(--size) var(--size)
+          `,
+          mask: 'linear-gradient(-20deg, transparent 50%, white)',
+          zIndex: -1
+        }}
+      />
 
       <div className="max-w-7xl mx-auto relative z-20">
         <div className="text-center mb-16 relative">
@@ -365,102 +356,136 @@ const About = () => {
             </div>
           </div>
 
-          {/* Profile Image dengan animasi dari Galvin Card */}
+          {/* GALVIN CARD - STRUKTUR PERSIS */}
           <div 
-            ref={imageContainerRef}
-            className="relative cursor-pointer group"
+            ref={cardRef}
+            className="relative w-[350px] lg:w-[400px]"
+            style={{
+              perspective: '1600px',
+              transformStyle: 'preserve-3d'
+            }}
             data-active={isActive}
           >
-            {/* Card container dengan efek 3D */}
+            {/* Card Container */}
             <div 
-              ref={imageRef}
-              className="relative w-[350px] h-[350px] lg:w-[400px] lg:h-[400px]"
+              ref={cardContentRef}
+              className="relative aspect-[5/7] w-full"
               style={{
-                perspective: '1600px',
                 transformStyle: 'preserve-3d',
-                transform: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0) 
+                transition: 'transform 0.2s',
+                transform: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0)
                   ? `rotateX(${mousePosition.y * 25}deg) rotateY(${mousePosition.x * -20}deg)`
-                  : 'none',
-                transition: 'transform 0.2s'
+                  : 'none'
               }}
             >
-              {/* Profile image dengan efek 3D */}
-              <div className="relative w-full h-full overflow-hidden rounded-3xl"
-                style={{
-                  clipPath: 'inset(0 0 0 0 round 2rem)',
-                  border: '4px solid rgba(255,255,255,0.1)',
-                  transform: 'translateZ(20px)',
-                  boxShadow: '0 25px 50px -12px rgba(249, 115, 22, 0.3)'
-                }}
-              >
-                <img 
-                  src="/profile.png" 
-                  alt="Galvin Alfito D - Web Developer" 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              {/* CARD FRONT - PERSIS dengan struktur Galvin Card */}
+              <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden' }}>
+                {/* Image Layer */}
+                <div className="absolute inset-0 rounded-3xl overflow-hidden" style={{ clipPath: 'inset(0 0 0 0 round 1.5rem)' }}>
+                  <img 
+                    ref={frontImgRef}
+                    src="/profile.png" 
+                    alt="Galvin Alfito D" 
+                    className="w-full h-full object-cover"
+                    style={{
+                      filter: 'brightness(0.85)',
+                      scale: '1.1',
+                      transform: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0)
+                        ? `translate(${mousePosition.x * 5}%, ${mousePosition.y * 5}%)`
+                        : 'none',
+                      transition: 'transform 0.2s'
+                    }}
+                  />
+                </div>
+
+                {/* Pattern Layer - seperti di Galvin Card */}
+                <div 
+                  className="absolute inset-0 opacity-40 pointer-events-none rounded-3xl"
                   style={{
-                    filter: 'brightness(0.85)',
-                    transform: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0)
-                      ? `translate(${mousePosition.x * 5}%, ${mousePosition.y * 5}%)`
-                      : 'none',
-                    transition: 'transform 0.2s'
+                    mask: 'url(https://assets.codepen.io/605876/figma-texture.png) 50% 50% / 2rem 2rem',
+                    mixBlendMode: 'multiply',
+                    background: 'hsl(0 0% 80%)'
+                  }}
+                />
+
+                {/* Watermark Layer */}
+                <div 
+                  className="absolute inset-0 opacity-100 pointer-events-none rounded-3xl"
+                  style={{
+                    mask: 'url(https://assets.codepen.io/605876/shopify-pattern.svg) 50% 50% / 7rem 7rem repeat',
+                    mixBlendMode: 'hard-light',
+                    background: 'rgba(255,255,255,0.2)'
+                  }}
+                />
+
+                {/* Refraction Effects - PERSIS seperti di Galvin Card */}
+                <div 
+                  className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl"
+                  style={{ opacity: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0) ? 1 : 0 }}
+                >
+                  <div 
+                    className="absolute w-[500%] aspect-square bottom-0 left-0"
+                    style={{
+                      background: 'radial-gradient(circle at 0 100%, transparent 10%, hsl(5 100% 80%), hsl(150 100% 60%), hsl(220 90% 70%), transparent 60%)',
+                      transformOrigin: '0 100%',
+                      scale: Math.min(1, 0.15 + Math.abs(mousePosition.x) * 0.25),
+                      translate: `clamp(-10%, -10% + ${mousePosition.x * 10}%, 10%) calc(max(0%, ${-mousePosition.y * 10}%))`,
+                      filter: 'saturate(2)'
+                    }}
+                  />
+                  <div 
+                    className="absolute w-[500%] aspect-square top-0 right-0"
+                    style={{
+                      background: 'radial-gradient(circle at 100% 0, transparent 10%, hsl(5 100% 80%), hsl(150 100% 60%), hsl(220 90% 70%), transparent 60%)',
+                      transformOrigin: '100% 0',
+                      scale: Math.min(1, 0.15 + -mousePosition.x * 0.65),
+                      translate: `clamp(-10%, 10% - ${-mousePosition.x * -10}%, 10%) calc(min(0%, ${-mousePosition.y * -10}%))`,
+                      filter: 'saturate(2)'
+                    }}
+                  />
+                </div>
+
+                {/* Card Frame dengan Nama - seperti di Galvin Card */}
+                <div className="absolute inset-0 z-10 rounded-3xl">
+                  <h3 
+                    className="absolute m-0 top-4 right-4 text-right font-black leading-none"
+                    style={{ opacity: isActive ? 1 : 0 }}
+                  >
+                    <span className="block text-4xl">Galvin Alfito D</span>
+                    <span className="block text-2xl">Web Development</span>
+                  </h3>
+                </div>
+
+                {/* Spotlight Effect */}
+                <div 
+                  className="absolute inset-0 mix-blend-overlay pointer-events-none rounded-3xl"
+                  style={{
+                    zIndex: 9999,
+                    opacity: isActive && (mousePosition.x !== 0 || mousePosition.y !== 0) ? 1 : 0
+                  }}
+                >
+                  <div 
+                    className="absolute left-1/2 top-1/2 w-[500%] aspect-square"
+                    style={{
+                      background: 'radial-gradient(rgba(255,255,255,0.4) 0 2%, rgba(0,0,0,0.2) 20%)',
+                      filter: 'brightness(1.2) contrast(1.2)',
+                      translate: `calc(-50% + ${mousePosition.x * 20}%) calc(-50% + ${mousePosition.y * 20}%)`
+                    }}
+                  />
+                </div>
+
+                {/* Glare Effect */}
+                <div 
+                  className="glare absolute inset-0 opacity-50 pointer-events-none rounded-3xl"
+                  style={{
+                    background: 'linear-gradient(-65deg, transparent 0 40%, white 40% 50%, transparent 30% 50%, transparent 50% 55%, white 55% 60%, transparent 60% 100%)',
+                    transform: 'translateX(0)'
                   }}
                 />
               </div>
-
-              {/* Refraction effects dari Galvin Card */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-                <div 
-                  className="absolute w-[500%] aspect-square bottom-0 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{
-                    background: 'radial-gradient(circle at 0 100%, transparent 10%, hsl(5 100% 80%), hsl(150 100% 60%), hsl(220 90% 70%), transparent 60%)',
-                    transformOrigin: '0 100%',
-                    scale: Math.min(1, 0.15 + Math.abs(mousePosition.x) * 0.25),
-                    translate: `clamp(-10%, -10% + ${mousePosition.x * 10}%, 10%) calc(max(0%, ${-mousePosition.y * 10}%))`,
-                    filter: 'saturate(2)'
-                  }}
-                />
-                <div 
-                  className="absolute w-[500%] aspect-square top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{
-                    background: 'radial-gradient(circle at 100% 0, transparent 10%, hsl(5 100% 80%), hsl(150 100% 60%), hsl(220 90% 70%), transparent 60%)',
-                    transformOrigin: '100% 0',
-                    scale: Math.min(1, 0.15 + -mousePosition.x * 0.65),
-                    translate: `clamp(-10%, 10% - ${-mousePosition.x * -10}%, 10%) calc(min(0%, ${-mousePosition.y * -10}%))`,
-                    filter: 'saturate(2)'
-                  }}
-                />
-              </div>
-
-              {/* Spotlight effect */}
-              <div 
-                className="absolute inset-0 mix-blend-overlay pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                style={{
-                  clipPath: 'inset(0 0 0 0 round 2rem)',
-                  zIndex: 9999
-                }}
-              >
-                <div 
-                  className="absolute left-1/2 top-1/2 w-[500%] aspect-square"
-                  style={{
-                    background: 'radial-gradient(rgba(255,255,255,0.4) 0 2%, rgba(0,0,0,0.2) 20%)',
-                    filter: 'brightness(1.2) contrast(1.2)',
-                    translate: `calc(-50% + ${mousePosition.x * 20}%) calc(-50% + ${mousePosition.y * 20}%)`,
-                    zIndex: 9999
-                  }}
-                />
-              </div>
-
-              {/* Glare effect */}
-              <div 
-                className="absolute inset-0 opacity-50 pointer-events-none rounded-3xl"
-                style={{
-                  background: 'linear-gradient(-65deg, transparent 0 40%, white 40% 50%, transparent 30% 50%, transparent 50% 55%, white 55% 60%, transparent 60% 100%)',
-                  zIndex: 9998
-                }}
-              />
             </div>
 
-            {/* Decorative elements */}
+            {/* Decorative Elements - seperti di Galvin Card */}
             <div className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
@@ -505,7 +530,7 @@ const About = () => {
         </div>
       </div>
 
-      {/* SVG Filters untuk efek lighting */}
+      {/* SVG Filters untuk efek lighting - PERSIS seperti Galvin Card */}
       <svg className="sr-only">
         <defs>
           <filter id="lighting">
