@@ -1,4 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { debounce } from 'lodash'; // atau buat custom debounce
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -11,11 +12,15 @@ const About = () => {
   const toolsRef = useRef([]);
   const statsRef = useRef([]);
   const profileRef = useRef(null);
+  const cursorRef = useRef(null); // Ref untuk cursor element
   
   const [isCvLoading, setIsCvLoading] = useState(false);
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [isHoveringProfile, setIsHoveringProfile] = useState(false);
+  
+  // Gunakan ref untuk cursor position (tidak trigger re-render)
+  const cursorPosRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
@@ -70,16 +75,41 @@ const About = () => {
     }
   };
 
-  // Handle mouse move for custom cursor
-  const handleMouseMove = (e) => {
-    if (profileRef.current) {
+  // Optimasi dengan requestAnimationFrame
+  const updateCursorPosition = useCallback((e) => {
+    if (profileRef.current && cursorRef.current) {
       const rect = profileRef.current.getBoundingClientRect();
-      setCursorPos({
+      cursorPosRef.current = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
-      });
+      };
+      
+      // Apply transform langsung ke DOM element tanpa re-render
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate(${cursorPosRef.current.x - 40}px, ${cursorPosRef.current.y - 40}px)`;
+      }
     }
-  };
+  }, []);
+
+  // Throttled mouse move handler
+  const handleMouseMove = useCallback((e) => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+    
+    rafRef.current = requestAnimationFrame(() => {
+      updateCursorPosition(e);
+    });
+  }, [updateCursorPosition]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -320,39 +350,47 @@ const About = () => {
             </div>
           </div>
 
-          {/* Profile Image dengan Custom Cursor - Foto Wok Saja */}
+          {/* Profile Image dengan Custom Cursor - Foto Wok Saja - OPTIMIZED */}
           <div 
             ref={profileRef}
-            className="relative cursor-none group"
+            className="relative group"
             onMouseEnter={() => setIsHoveringProfile(true)}
-            onMouseLeave={() => setIsHoveringProfile(false)}
+            onMouseLeave={() => {
+              setIsHoveringProfile(false);
+              // Reset cursor position when leaving
+              if (cursorRef.current) {
+                cursorRef.current.style.transform = 'translate(-9999px, -9999px)';
+              }
+            }}
             onMouseMove={handleMouseMove}
           >
-            {/* Custom Cursor - Hanya Foto Wok */}
-            {isHoveringProfile && (
-              <div 
-                className="absolute pointer-events-none z-50"
-                style={{
-                  left: cursorPos.x - 40,
-                  top: cursorPos.y - 40,
-                  width: '60px',
-                  height: '60px',
-                  transform: 'translate(0, 0)'
-                }}
-              >
-                <img 
-                  src="/Cursorr.jpg" 
-                  alt="wok cursor"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+            {/* Custom Cursor - Hanya Foto Wok - Sekarang menggunakan transform langsung */}
+            <div 
+              ref={cursorRef}
+              className={`absolute pointer-events-none z-50 transition-opacity duration-150 ${
+                isHoveringProfile ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{
+                width: '60px',
+                height: '60px',
+                transform: 'translate(-9999px, -9999px)', // Hide initially
+                willChange: 'transform' // Optimasi performa
+              }}
+            >
+              <img 
+                src="/Cursorr.jpg" 
+                alt="wok cursor"
+                className="w-full h-full object-cover rounded-full shadow-2xl"
+                loading="eager" // Load immediately
+              />
+            </div>
 
             <div className="relative w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-3xl border-4 border-gray-700 group-hover:border-orange-500 transition-all duration-300 shadow-2xl">
               <img 
                 src="/profile.png" 
                 alt="Galvin Alfito D - Web Developer" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="eager"
               />
             </div>
 
