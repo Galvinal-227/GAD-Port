@@ -17,17 +17,9 @@ const About = () => {
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
   const [isHoveringProfile, setIsHoveringProfile] = useState(false);
   
-  // Sederhanakan cursor - pakai state biasa aja
-  const handleMouseMove = (e) => {
-  if (!cursorRef.current || !profileRef.current) return;
-
-  const rect = profileRef.current.getBoundingClientRect();
-
-  const x = e.clientX - rect.left - 30;
-  const y = e.clientY - rect.top - 30;
-
-  cursorRef.current.style.transform = `translate(${x}px, ${y}px)`;
-};
+  // PAKE useRef UNTUK POSISI CURSOR (GAK BIKIN RE-RENDER)
+  const cursorPosRef = useRef({ x: -9999, y: -9999 });
+  const rafRef = useRef(null);
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
@@ -82,20 +74,35 @@ const About = () => {
     }
   };
 
-  // Sederhanakan mouse move - tanpa RAF kompleks
-  const handleMouseMove = (e) => {
-    if (profileRef.current) {
-      const rect = profileRef.current.getBoundingClientRect();
-      setCursorPos({
-        x: e.clientX - rect.left - 30, // 30 = setengah lebar cursor (60/2)
-        y: e.clientY - rect.top - 30
-      });
+  // OPTIMIZED: PAKE RAF + THROTTLE
+  const handleMouseMove = useCallback((e) => {
+    if (!profileRef.current || !cursorRef.current) return;
+    
+    // Cancel previous RAF
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
     }
-  };
+    
+    // Schedule update di frame berikutnya
+    rafRef.current = requestAnimationFrame(() => {
+      const rect = profileRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left - 30;
+      const y = e.clientY - rect.top - 30;
+      
+      // Update ref (GAK BIKIN RE-RENDER)
+      cursorPosRef.current = { x, y };
+      
+      // Update DOM langsung
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    });
+  }, []);
 
+  // OPTIMIZED: ANIMASI GSAP LEBIH EFISIEN
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Section fade in
+      // Main section fade - PAKE ONCE biar gak reverse terus
       gsap.fromTo(sectionRef.current,
         { opacity: 0, y: 100 },
         {
@@ -106,7 +113,7 @@ const About = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 80%",
-            toggleActions: "play none none reverse"
+            once: true // HANYA SEKALI
           }
         }
       );
@@ -123,83 +130,91 @@ const About = () => {
           scrollTrigger: {
             trigger: textRef.current,
             start: "top 80%",
-            toggleActions: "play none none reverse"
+            once: true
           }
         }
       );
 
-      // Skills animation
-      skillsRef.current.forEach((skill, index) => {
-        gsap.fromTo(skill,
+      // Skills animation - PAKE STAGGER BUILT-IN (LEBIH RINGAN)
+      if (skillsRef.current.length > 0) {
+        gsap.fromTo(skillsRef.current,
           { y: 50, opacity: 0, scale: 0.8 },
           {
             y: 0,
             opacity: 1,
             scale: 1,
             duration: 0.8,
-            delay: index * 0.15,
+            stagger: 0.1, // LEBIH EFISIEN DARIPADA LOOP MANUAL
             ease: "back.out(1.7)",
             scrollTrigger: {
-              trigger: skill,
+              trigger: skillsRef.current[0],
               start: "top 90%",
-              toggleActions: "play none none reverse"
+              once: true
             }
           }
         );
-      });
+      }
 
-      // Tools animation
-      toolsRef.current.forEach((tool, index) => {
-        gsap.fromTo(tool,
+      // Tools animation - PAKE STAGGER
+      if (toolsRef.current.length > 0) {
+        gsap.fromTo(toolsRef.current,
           { y: 30, opacity: 0, scale: 0 },
           {
             y: 0,
             opacity: 1,
             scale: 1,
             duration: 0.6,
-            delay: index * 0.1,
+            stagger: 0.08,
             ease: "back.out(1.7)",
             scrollTrigger: {
-              trigger: tool,
+              trigger: toolsRef.current[0],
               start: "top 90%",
-              toggleActions: "play none none reverse"
+              once: true
             }
           }
         );
-      });
+      }
 
-      // Stats animation
-      statsRef.current.forEach((stat, index) => {
-        gsap.fromTo(stat,
+      // Stats animation - PAKE STAGGER
+      if (statsRef.current.length > 0) {
+        gsap.fromTo(statsRef.current,
           { y: 50, opacity: 0, scale: 0.5 },
           {
             y: 0,
             opacity: 1,
             scale: 1,
             duration: 1,
-            delay: index * 0.2,
+            stagger: 0.15,
             ease: "elastic.out(1, 0.5)",
             scrollTrigger: {
-              trigger: stat,
+              trigger: statsRef.current[0],
               start: "top 90%",
-              toggleActions: "play none none reverse"
+              once: true
             }
           }
         );
-      });
+      }
 
     }, sectionRef);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
   return (
     <section ref={sectionRef} id="about" className="py-20 px-4 lg:px-20 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] relative overflow-hidden min-h-screen">
-      {/* Background Grid Pattern - SEDERHANAKAN */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-        backgroundImage: 'radial-gradient(circle at 1px 1px, gray 1px, transparent 0)',
-        backgroundSize: '40px 40px'
-      }} />
+      {/* Background Pattern - PAKE CSS PURA (LEBIH RINGAN) */}
+      <div 
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, gray 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }}
+      />
 
       <div className="max-w-7xl mx-auto relative z-20">
         <div className="text-center mb-16 relative">
@@ -236,7 +251,7 @@ const About = () => {
                   Technical Skills
                 </h4>
                 <div className="space-y-4">
-                  {skills.map((skill, index) => (
+                  {skills.map((skill) => (
                     <div
                       key={skill.name}
                       ref={addToSkillsRefs}
@@ -257,7 +272,7 @@ const About = () => {
                   Tools & Technologies
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
-                  {tools.map((tool, index) => (
+                  {tools.map((tool) => (
                     <div
                       key={tool.name}
                       ref={addToToolsRefs}
@@ -322,34 +337,33 @@ const About = () => {
             </div>
           </div>
 
-          {/* Profile Image - SEDERHANAKAN BANGET */}
+          {/* Profile Image - OPTIMIZED CURSOR */}
           <div 
             ref={profileRef}
             className="relative"
             onMouseEnter={() => setIsHoveringProfile(true)}
             onMouseLeave={() => {
               setIsHoveringProfile(false);
-              setCursorPos({ x: -9999, y: -9999 });
+              if (cursorRef.current) {
+                cursorRef.current.style.transform = 'translate(-9999px, -9999px)';
+              }
             }}
             onMouseMove={handleMouseMove}
           >
-            {/* Custom Cursor */}
-            {isHoveringProfile && (
-              <div 
-                className="absolute pointer-events-none z-50"
-                style={{
-                  left: cursorPos.x,
-                  top: cursorPos.y,
-                  width: '60px',
-                  height: '60px',
-                  transition: 'left 0.05s, top 0.05s' // kasih transisi dikit biar halus
-                }}
-              >
-                <div className="w-full h-full bg-orange-500 rounded-full"></div>
-              </div>
-            )}
+            {/* Custom Cursor - PAKE CSS TRANSITION DI PARENT */}
+            <div 
+              ref={cursorRef}
+              className="absolute pointer-events-none z-50 w-[60px] h-[60px] bg-orange-500 rounded-full"
+              style={{
+                transform: 'translate(-9999px, -9999px)',
+                transition: 'transform 0.02s linear', // TRANSISI SANGAT CEPAT
+                left: 0,
+                top: 0,
+                willChange: 'transform' // OPTIMASI PERFORMANCE
+              }}
+            />
 
-            {/* Profile Image - HAPUS SEMUA ANIMASI */}
+            {/* Profile Image */}
             <div className="w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-3xl border-4 border-gray-700">
               <img 
                 src="/profile.png" 
@@ -358,7 +372,7 @@ const About = () => {
               />
             </div>
 
-            {/* Decorative Elements - HAPUS SEMUA ANIMASI */}
+            {/* Decorative Elements */}
             <div className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
@@ -376,14 +390,14 @@ const About = () => {
           </div>
         </div>
 
-        {/* Stats - SEDERHANAKAN */}
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-gray-800">
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
             { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
             { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" },
             { number: "100%", label: "Passion", icon: "bx bx-heart" }
-          ].map((stat, index) => (
+          ].map((stat) => (
             <div
               key={stat.label}
               ref={addToStatsRefs}
