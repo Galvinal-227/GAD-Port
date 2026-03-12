@@ -372,24 +372,24 @@ const About = () => {
             </div>
           </div>
 
-          {/* Profile Image with Morphing Effect - SATU FOTO SAJA */}
+          {/* Profile Image with Morphing Effect - Menggunakan foto dari Galvin Card */}
           <div 
             ref={imageContainerRef}
             className="relative cursor-pointer group"
           >
-            {/* Profile Frame dengan efek morphing - SATU FRAME SAJA */}
+            {/* Profile Frame dengan efek morphing */}
             <div 
               ref={imageRef}
               className="profile-frame w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] relative overflow-hidden shadow-2xl"
             >
               <img 
                 src="/profile.png" 
-                alt="Profile" 
+                alt="Galvin Alfito D - Web Developer" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
             </div>
 
-            {/* Decorative elements - Tetap ada untuk mempercantik */}
+            {/* Decorative elements */}
             <div className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
               <i className="bx bx-code-alt text-white text-xl"></i>
             </div>
@@ -408,9 +408,6 @@ const About = () => {
                 <span>2+ Years Exp</span>
               </div>
             </div>
-
-            <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center">
-            </div>
           </div>
         </div>
 
@@ -419,7 +416,8 @@ const About = () => {
           {[
             { number: "10+", label: "Projects Completed", icon: "bx bx-check-circle" },
             { number: "2+", label: "Years Experience", icon: "bx bx-calendar" },
-            { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" }
+            { number: "24/7", label: "Code Enthusiast", icon: "bx bx-coffee" },
+            { number: "100%", label: "Passion", icon: "bx bx-heart" }
           ].map((stat, index) => (
             <div
               key={stat.label}
