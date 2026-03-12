@@ -18,7 +18,16 @@ const About = () => {
   const [isHoveringProfile, setIsHoveringProfile] = useState(false);
   
   // Sederhanakan cursor - pakai state biasa aja
-  const [cursorPos, setCursorPos] = useState({ x: -9999, y: -9999 });
+  const handleMouseMove = (e) => {
+  if (!cursorRef.current || !profileRef.current) return;
+
+  const rect = profileRef.current.getBoundingClientRect();
+
+  const x = e.clientX - rect.left - 30;
+  const y = e.clientY - rect.top - 30;
+
+  cursorRef.current.style.transform = `translate(${x}px, ${y}px)`;
+};
 
   const projectsUrl = "https://galvinal-227.github.io/ProjectGallery/";
   const cvDriveUrl = "https://drive.google.com/file/d/1ADb9rmnCz_lUvl8aoTz9Pi7sd8hVCGsB/view?usp=drive_link";
