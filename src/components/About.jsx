@@ -320,7 +320,7 @@ const About = () => {
             </div>
           </div>
 
-          {/* Profile Image dengan Custom Cursor Gambar Wok */}
+          {/* Profile Image dengan Custom Cursor - Foto Wok Saja */}
           <div 
             ref={profileRef}
             className="relative cursor-none group"
@@ -328,69 +328,25 @@ const About = () => {
             onMouseLeave={() => setIsHoveringProfile(false)}
             onMouseMove={handleMouseMove}
           >
-            {/* Custom Cursor dengan Gambar Wok */}
+            {/* Custom Cursor - Hanya Foto Wok */}
             {isHoveringProfile && (
-              <>
-                <div 
-                  className="absolute pointer-events-none z-50"
-                  style={{
-                    left: cursorPos.x - 40,
-                    top: cursorPos.y - 40,
-                    transition: 'transform 0.1s ease',
-                    width: '80px',
-                    height: '80px'
-                  }}
-                >
-                  <img 
-                    src="/Cursorr.jpg" 
-                    alt="Wok Cursor"
-                    className="w-full h-full object-contain animate-bounce"
-                    style={{
-                      filter: 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.5))'
-                    }}
-                  />
-                  
-                  {/* Efek api di belakang wok */}
-                  <div className="absolute inset-0 -z-10">
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-t from-orange-600 to-yellow-500 rounded-full blur-xl animate-pulse"></div>
-                  </div>
-                </div>
-
-                {/* Trail effect dengan partikel kecil */}
-                <div 
-                  className="absolute pointer-events-none z-40"
-                  style={{
-                    left: cursorPos.x - 45,
-                    top: cursorPos.y - 45,
-                    width: '90px',
-                    height: '90px'
-                  }}
-                >
-                  <div className="absolute inset-0 border-2 border-orange-500/30 rounded-full animate-ping"></div>
-                  <div className="absolute inset-2 border border-yellow-500/20 rounded-full animate-pulse"></div>
-                </div>
-
-                {/* Teks "SIZZLING..." yang mengikuti cursor */}
-                <div 
-                  className="absolute pointer-events-none z-50 text-orange-400 font-bold text-sm whitespace-nowrap"
-                  style={{
-                    left: cursorPos.x - 20,
-                    top: cursorPos.y - 70,
-                    textShadow: '0 0 10px rgba(249, 115, 22, 0.5)',
-                    animation: 'flicker 1.5s infinite'
-                  }}
-                >
-                  🔥 SIZZLING... 🔥
-                </div>
-              </>
+              <div 
+                className="absolute pointer-events-none z-50"
+                style={{
+                  left: cursorPos.x - 40,
+                  top: cursorPos.y - 40,
+                  width: '60px',
+                  height: '60px',
+                  transform: 'translate(0, 0)'
+                }}
+              >
+                <img 
+                  src="/Cursorr.jpg" 
+                  alt="wok cursor"
+                  className="w-full h-full object-cover rounded-full border-2 border-orange-500"
+                />
+              </div>
             )}
-
-            <style jsx>{`
-              @keyframes flicker {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.7; }
-              }
-            `}</style>
 
             <div className="relative w-[350px] h-[350px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-3xl border-4 border-gray-700 group-hover:border-orange-500 transition-all duration-300 shadow-2xl">
               <img 
@@ -398,12 +354,6 @@ const About = () => {
                 alt="Galvin Alfito D - Web Developer" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              
-              {/* Overlay dengan efek memasak */}
-              <div className="absolute inset-0 bg-gradient-to-t from-orange-500/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              {/* Efek uap panas */}
-              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-orange-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg"></div>
             </div>
 
             {/* Decorative Elements */}
@@ -420,13 +370,6 @@ const About = () => {
                 <i className="bx bx-award"></i>
                 <span>2+ Years Exp</span>
               </div>
-            </div>
-
-            {/* Tooltip dengan tema wok */}
-            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 border border-orange-500/50 shadow-xl backdrop-blur-sm">
-              <span className="flex items-center gap-2">
-                <img src="/Cursorr.jpg" alt="wok" className="w-5 h-5 rounded-full object-cover" />
-              </span>
             </div>
           </div>
         </div>
