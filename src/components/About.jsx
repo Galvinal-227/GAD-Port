@@ -345,11 +345,7 @@ const About = () => {
                   transition: 'left 0.05s, top 0.05s' // kasih transisi dikit biar halus
                 }}
               >
-                <img 
-                  src="/Cursorr.jpg" 
-                  alt="cursor"
-                  className="w-full h-full object-cover rounded-full"
-                />
+                <div className="w-full h-full bg-orange-500 rounded-full"></div>
               </div>
             )}
 
